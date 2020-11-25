@@ -6,8 +6,6 @@ import socket
 import exceptions
 import math
 import argparse
-from pymavlink import mavutil
-
 
 ##### Functions ######
 
@@ -29,7 +27,7 @@ def connectMyCopter():
 	return vehicle
 
 def arm_and_takeoff(targetHeight):
-	while vehicle.is_armable != True:
+	while vehicle.is_armable!=True:
 		print("Waiting for vehicle to become armable")
 		time.sleep(1)
 	print("Vehicle is now armable")
@@ -47,30 +45,56 @@ def arm_and_takeoff(targetHeight):
 		time.sleep(1)
 	print("Virtual props are spinning!")
 
-	vehicle.simple_takeoff(targetHeight) ## in metres
+	vehicle.simple_takeoff(targetHeight) ## in meters
 
 	while True:
-		print("Current Altitude: %d" % vehicle.location.global_relative_frame.alt)
+		print("Current Altitude: %d"%vehicle.location.global_relative_frame.alt)
 		if vehicle.location.global_relative_frame.alt >= .95*targetHeight:
 			break
 		time.sleep(1)
 	print("Target altitude reached")
 	return None
 
+def get_distance_meters(targetLocation, currentLocation):
+	dLat = targetLocation.lat - currentLocation.lat
+	dLon = targetLocation.lon - currentLocation.lon
+	# Hypotenuse between points then using the radius of the earth to calculate distance in metres
+	return math.sqrt((dLon*dLon)+(dLat*dLat))*1.113195e5
 
+def goto(targetLocation):
+	distanceToTargetLocation = get_distance_meters(targetLocation, vehicle.location.global_relative_frame)
+	
+	vehicle.simple_goto(targetLocation)
+	
+	while vehicle.mode.name=="GUIDED":
+		currentDistance = get_distance_meters(targetLocation, vehicle.location.global_relative_frame)
+		if currentDistance < distanceToTargetLocation*0.01: #tolerance, as vehicle tries to go exactly to the point
+			print("Reached target waypoint")
+			time.sleep(2)
+			break
+		time.sleep(1)
+	return None
 
 ###### Main Excecutable ######
 
-# while confirmation != 'yes':
-    # these will require limits
-    dropHeight = input('What height would you like the seeds to be dropped from? (metres): ')
-    # dropSpacing = input('How far away do you want the drop locations to be from one another? (metres): ')
-    # dropColumns = input('How many columns of seeds?: ')
-    # dropRows = input('How many rows of seeds?: ')
-    # dropAreaLength = dropSpacing * (dropRows - 1)
-    # dropAreaWidth = dropSpacing * (dropColumns - 1)
-    # confirmation = raw_input('This gives you a total drop area length of %dm and a drop area width of %dm. If this is okay type "yes": ' % (dropAreaLength, dropAreaWidth) )
+wp1 = LocationGlobalRelative(44.50202, -88.060316, 10)
 
 vehicle = connectMyCopter()
+arm_and_takeoff(10)
 
-arm_and_takeoff(dropHeight)
+goto(wp1)
+
+
+
+vehicle.mode = VehicleMode("LAND")
+while vehicle.mode != "LAND":
+	print("Waiting for the drone to enter LAND mode")
+	time.sleep(1)
+print("Vehicle in LAND mode")
+
+while True:
+	time.sleep(1)
+	
+
+
+
