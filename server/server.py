@@ -10,4 +10,4 @@ def index():
     return 'hello world'
 
 if __name__ == '__main__':
-    io.run(app, host="0.0.0.0", port=80)
+    io.run(app, host="0.0.0.0", port=3000)
