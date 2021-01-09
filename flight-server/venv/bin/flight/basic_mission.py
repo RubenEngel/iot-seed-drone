@@ -92,7 +92,8 @@ def velocity_magnitude():
 
 def goto_relative_to_current_location(north, east, down):
 	goto_position_target_local_ned(north, east, down)
-	time.sleep(2)
+        while velocity_magnitude() < 0.125:
+                time.sleep(0.5)
 	while velocity_magnitude() > 0.125:
 		print 'Velocity: {}'.format(velocity_magnitude())
 		print "{}".format(vehicle.location.local_frame)
@@ -131,7 +132,7 @@ def seed_planting_mission(rows, columns):
 			while vehicle.mode != "RTL": # waiting for the mode to change, the command is not instant.
 				print("PREPARING DRONE TO RETURN HOME...")
 				time.sleep(1)
-			print("Vehicle in RETURN TO LAUNCH mode")
+			print("Vehicle is returning home.")
 		else:
 			if column % 2 != 0: # if column is odd, move right to get to new column.
 				print 'Moving to new column.'
