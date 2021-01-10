@@ -5,8 +5,10 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import io from 'socket.io-client';
 
+const socket = io();
+
 function App() {
-      const socket = io();
+      
       
       const [currentTime, setCurrentTime] = useState(0);
 
