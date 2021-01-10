@@ -64,14 +64,16 @@ function App() {
         <li>{log}</li>
       )
 
-      socket.on('message', (data) =>
-      console.log(data))
+      // socket.on('message', (data) =>
+      // console.log(data))
 
-      // useEffect(() => {
-      //   socket.on('mission-log', (data) =>
-      //     console.log(data))
-      //   return () => {socket.off('mission-log')}
-      //    }, [missionLog])
+      useEffect(() => {
+        socket.on('message', (data) => {
+          console.log(data)
+          setMissionLog([...missionLog, data])
+          console.log(missionLog)
+        return () => {socket.off('mission-log')}
+         }, [missionLog])
 
   return (
     <div className="App">
