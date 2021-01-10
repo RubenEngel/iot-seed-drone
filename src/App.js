@@ -46,7 +46,8 @@ function App() {
         const flightParams = ({
           dropHeight: dropHeight,
           dropColumns: dropColumns,
-          dropRows: dropRows
+          dropRows: dropRows,
+          dropSpacing: dropSpacing
         })
         console.log(flightParams)
         if (dropHeight !== '' && dropColumns !== '' && dropRows !== '') {
