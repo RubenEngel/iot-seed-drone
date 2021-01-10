@@ -38,6 +38,7 @@ function App() {
       const [dropHeight, setDropHeight] = useState('')
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
+      const [dropSpacing, setDropSpacing] = useState('')
       const [flightStarted, setFlightStarted] = useState(false)
       const [missionLog, setMissionLog] = useState([])
 
@@ -78,20 +79,26 @@ function App() {
         <h1>Seed Planting IoT Drone</h1>
         <h3>{currentTime}</h3>
 
+        {!flightStarted && 
+        <>
         <Form>
           <Form.Label>Drop Height</Form.Label>
-            <Form.Control onChange={e => setDropHeight(e.target.value)} value={dropHeight} type="number" step="1"/>
+            <Form.Control onChange={e => setDropHeight(e.target.value)} value={dropHeight} type="number"/>
           <Form.Label>Drop Columns</Form.Label>
-            <Form.Control onChange={e => setDropColumns(e.target.value)} value={dropColumns} type="number" step="1"/>
+            <Form.Control onChange={e => setDropColumns(e.target.value)} value={dropColumns} type="number"/>
           <Form.Label>Drop Rows</Form.Label>
-            <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number" step="1"/>
+            <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number"/>
+          <Form.Label>Drop Spacing</Form.Label>
+            <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
         </Form>
         <Button onClick={handleSubmit} className="start-flight" variant="warning">Start Flight</Button>
-        <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button>
+        </>
+        }
 
         {flightStarted && 
           <div>
             <h3>Mission Log</h3>
+            <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button>
             <ul>{missionLogList}</ul>
           </div>
           }

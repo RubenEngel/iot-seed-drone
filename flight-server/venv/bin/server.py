@@ -15,6 +15,7 @@ def get_current_time():
 dropHeight = 0
 dropColumns = 0
 dropRows = 0
+dropSpacing = 0
 
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
@@ -22,9 +23,11 @@ def get_flight_params():
     global dropHeight
     global dropColumns
     global dropRows
+    global dropSpacing
     dropHeight = flight_params['dropHeight']
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
+    dropSpacing = flight_params['dropSpacing']
     return 'Done', 201
 
 
