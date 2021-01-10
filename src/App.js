@@ -12,8 +12,16 @@ function App() {
 
       useEffect(() => {
         fetch('/api/time').then(res => res.json()).then(data => {
-          setCurrentTime(data.time);
-        });
+          setCurrentTime(data.time); 
+         });
+        return () => {
+          socket.off('message')
+          socket.off('status')
+          socket.disconnect()
+        }; // disconnect sockets when page unmounts
+      }, [])
+
+      useEffect(() => {
         socket.on('message', (data) => {
           setMissionLog([...missionLog, data])
         })
@@ -22,11 +30,6 @@ function App() {
             setFlightStarted(false)
             setMissionLog([])
           }})  
-        return () => {
-          socket.off('message')
-          socket.off('status')
-          socket.disconnect()
-        }; // disconnect sockets when page unmounts
       }, [missionLog, socket]);
 
       const [dropHeight, setDropHeight] = useState('')
