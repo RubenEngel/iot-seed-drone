@@ -45,6 +45,10 @@ function App() {
         dropRows: dropRows
       }
 
+      function handleSubmit() {
+        console.log(flightParams)
+      }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -60,7 +64,7 @@ function App() {
           <Form.Label>Drop Rows</Form.Label>
             <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number" step="1"/>
         </Form>
-        <Button onClick={console.log(flightParams)} className="start-flight" variant="warning">Start Flight</Button>
+        <Button onClick={console.log(handleSubmit)} className="start-flight" variant="warning">Start Flight</Button>
 
 
       </header>
