@@ -13,5 +13,5 @@ def get_flight_params():
     dropHeight = request.args.get(dropHeight)
     dropColumns = request.args.get(dropColumns)
     dropRows = request.args.get(dropRows)
-    return jsonify(dropHeight=dropHeight, dropColumns=dropColumns, dropRows=dropRows )
+    return jsonify(dropHeight=dropHeight, dropColumns=dropColumns, dropRows=dropRows)
     

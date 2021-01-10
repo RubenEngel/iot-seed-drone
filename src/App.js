@@ -55,7 +55,8 @@ function App() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(flightParams)
           })
-          .then(response => console.log(response.json()))
+          .then(response => response.text())
+          .then(text => console.log(text))
         }
       }
 
