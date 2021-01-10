@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
 import time
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -59,5 +60,5 @@ def on_disconnect():
 def on_flight_start():
     count = 0
     while count < 20:
-        emit('message', jsonify('Test {}'.format(count)))
+        emit('message', json.('Test {}'.format(count)))
         time.sleep(1)
