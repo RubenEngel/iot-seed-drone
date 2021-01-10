@@ -46,22 +46,17 @@ function App() {
         dropRows: dropRows
       })
 
-      async function handleSubmit() {
+      function handleSubmit() {
         console.log(flightParams)
         if (dropHeight !== '' && dropColumns !== '' && dropRows !== '') {
           setFlightStarted(true)
-          const response = await fetch('/api/params', {
+          fetch('/api/params', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(flightParams)
-          })
-          if (response.ok) {
-          console.log('response worked')
+          }).then(res => console.log(res))
         }
         }
-        
-
-      }
 
   return (
     <div className="App">

@@ -16,7 +16,7 @@ def get_flight_params(request):
     dropHeight = flight_params['dropHeight']
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
-    print(flight_params)
+    return jsonify(flight_params)
     
 @app.route('/api/log')
 def get_mission_log():
