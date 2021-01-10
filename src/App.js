@@ -45,6 +45,7 @@ function App() {
           .then(() => setFlightStarted(true))
           .catch(err => console.log(err))
         }
+        socket.emit('flight-start')
         }
 
         // Mission Log
@@ -66,10 +67,10 @@ function App() {
 
       socket.on('mission-log', getMissionLog)
 
-      useEffect(() => {
-        
-       return () => {socket.off('mission-log')}
-      }, [missionLog])
+      // useEffect(() => {
+
+      //  return () => {socket.off('mission-log')}
+      // }, [missionLog])
 
   return (
     <div className="App">
@@ -97,7 +98,7 @@ function App() {
         {flightStarted && 
           <div>
             <h3>Mission Log</h3>
-            <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button>
+            {/* <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button> */}
             <div className='mission-log'>
               <ul>{missionLogList}</ul>
             </div>
