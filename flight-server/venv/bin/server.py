@@ -35,11 +35,11 @@ def get_flight_params():
 
 missionLog = []
 missionLog.append('Flying to altitude of {}'.format(dropHeight))
-time.sleep(dropHeight)
 missionLog.append('Reached target altitude')
 missionLog.append('Dropping Seeds')
-time.sleep(2)
-missionLog.append('Moving to next waypoint..')
+missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
+missionLog.append('Total drop rows = {}'.format(dropRows))
+missionLog.append('Total drop columns = {}'.format(dropColumns))
 
 ##### GET MISSION LOG   
 
