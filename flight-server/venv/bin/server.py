@@ -61,5 +61,6 @@ def on_flight_start():
     while count < 20:
         time.sleep(1)
         message = 'Test {}'.format(count)
-        emit('message', jsonify( {'message': message } )
+        emit('message', jsonify({'message': message })
+    return None
         
