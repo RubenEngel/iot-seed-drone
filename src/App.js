@@ -27,7 +27,7 @@ function App() {
           socket.off('status')
           socket.disconnect()
         }; // disconnect sockets when page unmounts
-      }, []);
+      }, [missionLog, socket]);
 
       const [dropHeight, setDropHeight] = useState('')
       const [dropColumns, setDropColumns] = useState('')
