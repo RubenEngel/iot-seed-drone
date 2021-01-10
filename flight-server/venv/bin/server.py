@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -11,6 +12,8 @@ CORS(app, support_credentials=True)
 @app.route('/api/time')
 def get_current_time():
     return {'time': datetime.datetime.now()}
+
+###### GET FLIGHT PARAMETER FROM FRONT END SUBMISSION
 
 dropHeight = 0
 dropColumns = 0
@@ -30,9 +33,16 @@ def get_flight_params():
     dropSpacing = flight_params['dropSpacing']
     return 'Done', 201
 
+missionLog = []
+missionLog.append('Flying to altitude of {}'.format(dropHeight))
+time.sleep(dropHeight)
+missionLog.append('Reached target altitude')
+missionLog.append('Dropping Seeds')
+time.sleep(2)
+missionLog.append('Moving to next waypoint..')
+
+##### GET MISSION LOG   
 
 @app.route('/api/log')
 def get_mission_log():
-    missionLog = []
-    missionLog.append('Flying to altitude of {}'.format(dropHeight))
     return jsonify({'missionLog' : missionLog})
