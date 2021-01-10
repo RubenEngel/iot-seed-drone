@@ -12,18 +12,20 @@ CORS(app, support_credentials=True)
 def get_current_time():
     return {'time': datetime.datetime.now()}
 
+dropHeight = 0
+dropColumns = 0
+dropRows = 0
+
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
     flight_params = request.get_json()
-    dropHeight = flight_params['dropHeight']
-    dropColumns = flight_params['dropColumns']
-    dropRows = flight_params['dropRows']
-    return dropHeight, dropColumns, dropRows
+    global dropHeight = flight_params['dropHeight']
+    global dropColumns = flight_params['dropColumns']
+    global dropRows = flight_params['dropRows']
 
 
 @app.route('/api/log')
 def get_mission_log():
     missionLog = []
-    dropHeight, dropColumns, dropRows = get_flight_params()
     missionLog.append('Flying to altitude of {}'.format(dropHeight))
     return jsonify({'missionLog' : missionLog})
