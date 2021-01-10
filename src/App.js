@@ -64,10 +64,10 @@ function App() {
           if (status === 'complete') {
             setFlightStarted(false)
             setMissionLog([])
-            socket.off('status')
           }})     
         return () => {
           socket.off('mission-log')
+          socket.off('status')
         }
          }, [missionLog])
 
