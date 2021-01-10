@@ -18,11 +18,12 @@ def get_flight_params():
     dropHeight = flight_params['dropHeight']
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
-    missionLog = []
-    return jsonify(flight_params)
+    return dropHeight, dropColumns, dropRows
 
 
 @app.route('/api/log')
 def get_mission_log():
-    get_flight_params.missionLog.append('Flying to altitude of {}'.format(get_flight_params.dropHeight))
-    return jsonify({'missionLog' : get_flight_params.missionLog})
+    missionLog = []
+    dropHeight, dropColumns, dropRows = get_flight_params()
+    missionLog.append('Flying to altitude of {}'.format(dropHeight))
+    return jsonify({'missionLog' : missionLog})
