@@ -38,7 +38,7 @@ function App() {
     <div className="App">
       <header className="App-header">
 
-        <h1>Seed Planting IoT Drone</h1>
+        <h1>Seed Planting IoT Drone Test</h1>
 
         {/* <div><Button onClick={startFlight} variant="warning">Start Flight</Button></div> */}
         <h3>{currentTime}</h3>
