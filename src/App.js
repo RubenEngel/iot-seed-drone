@@ -39,13 +39,19 @@ function App() {
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
 
+      const flightParams = {
+        dropHeight: dropHeight,
+        dropColumns: dropColumns,
+        dropRows: dropRows
+      }
+
   return (
     <div className="App">
       <header className="App-header">
 
         <h1>Seed Planting IoT Drone</h1>
         <h3>{currentTime}</h3>
-        
+
         <Form>
           <Form.Label>Drop Height</Form.Label>
             <Form.Control onChange={e => setDropHeight(e.target.value)} value={dropHeight} type="number" step="1"/>
@@ -54,7 +60,7 @@ function App() {
           <Form.Label>Drop Rows</Form.Label>
             <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number" step="1"/>
         </Form>
-        <Button className="start-flight" variant="warning">Start Flight</Button>
+        <Button onClick={console.log(flightParams)} className="start-flight" variant="warning">Start Flight</Button>
 
 
       </header>
