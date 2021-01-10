@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socket = SocketIO(app)
+socket = SocketIO(app, cors_allowed_origins="*")
 CORS(app, support_credentials=True)
 
 @app.route('/api/time')

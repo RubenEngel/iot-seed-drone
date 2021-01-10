@@ -13,7 +13,8 @@ function App() {
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
         });
-        // const socket = io();
+        const socket = io()
+        return () => { socket.disconnect() }; // disconnect socket when page unmounts
       }, []);
 
       const [dropHeight, setDropHeight] = useState('')
@@ -49,16 +50,20 @@ function App() {
       const [missionLog, setMissionLog] = useState([])
 
       function getMissionLog() {
-        fetch('/api/log', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        }).then(res => res.json()).then(data => setMissionLog(data.missionLog))
+        // fetch('/api/log', {
+        //   method: 'GET',
+        //   headers: { 'Content-Type': 'application/json' }
+        // }).then(res => res.json()).then(data => setMissionLog(data.missionLog))
+        socket.on
       }
       
       const missionLogList = missionLog.map((log) => 
         <li>{log}</li>
       )
 
+      useEffect(() => {
+        getMissionLog()
+      })
 
   return (
     <div className="App">
