@@ -49,7 +49,7 @@ function App() {
       function handleSubmit() {
         console.log(flightParams)
         setFlightStarted(true)
-        if (dropHeight != '' && dropColumns != '' && dropRows != '') {
+        if (dropHeight !== '' && dropColumns !== '' && dropRows !== '') {
           fetch('/api/params', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

@@ -10,5 +10,5 @@ def get_current_time():
 
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
-    print request
+    return 'hello'
     
