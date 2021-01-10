@@ -100,7 +100,9 @@ function App() {
           <div>
             <h3>Mission Log</h3>
             <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button>
-            <ul>{missionLogList}</ul>
+            <div className='mission-log'>
+              <ul>{missionLogList}</ul>
+            </div>
           </div>
           }
 
