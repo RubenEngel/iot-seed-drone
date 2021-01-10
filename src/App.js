@@ -59,20 +59,18 @@ function App() {
       useEffect(() => {
         socket.on('message', (data) => {
           setMissionLog([...missionLog, data])
-        })     
-        return () => {
-          socket.off('mission-log')
-        }
-         }, [missionLog])
-
-      while (flightStarted) {
+        })
         socket.on('status', (status) => {
           if (status === 'complete') {
             setFlightStarted(false)
             setMissionLog([])
             socket.off('status')
-          }})
-      } 
+          }})     
+        return () => {
+          socket.off('mission-log')
+        }
+         }, [missionLog])
+
 
   return (
     <div className="App">
