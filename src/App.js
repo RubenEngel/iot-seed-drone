@@ -5,6 +5,8 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import io from 'socket.io-client';
 
+const socket = io()
+
 function App() {
 
       const [currentTime, setCurrentTime] = useState(0);
@@ -13,7 +15,7 @@ function App() {
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
         });
-        const socket = io()
+        
         return () => { socket.disconnect() }; // disconnect socket when page unmounts
       }, []);
 
