@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import datetime
 
 app = Flask(__name__)
@@ -10,5 +10,8 @@ def get_current_time():
 
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
-    return 'hello'
+    dropHeight = request.args.get(dropHeight)
+    dropColumns = request.args.get(dropColumns)
+    dropRows = request.args.get(dropRows)
+    return jsonify(dropHeight=dropHeight, dropColumns=dropColumns, dropRows=dropRows )
     
