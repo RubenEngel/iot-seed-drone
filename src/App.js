@@ -65,10 +65,10 @@ function App() {
             setFlightStarted(false)
             setMissionLog([])
           }})     
-        return () => {
-          socket.off('mission-log')
-          socket.off('status')
-        }
+        // return () => {
+        //   socket.off('mission-log')
+        //   socket.off('status')
+        // }
          }, [missionLog])
 
 
