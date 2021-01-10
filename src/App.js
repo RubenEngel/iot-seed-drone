@@ -39,6 +39,8 @@ function App() {
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
       const [dropSpacing, setDropSpacing] = useState('')
+
+      const [startStatus, setStartStatus] = useState('')
       const [flightStarted, setFlightStarted] = useState(false)
       const [missionLog, setMissionLog] = useState([])
 
@@ -51,12 +53,13 @@ function App() {
         })
         console.log(flightParams)
         if (dropHeight !== '' && dropColumns !== '' && dropRows !== '') {
-          setFlightStarted(true)
+          setStartStatus('Starting flight...')
           fetch('/api/params', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(flightParams)
           }).then(res => console.log(res.ok))
+          .then(() => setFlightStarted(true))
           .catch(err => console.log(err))
         }
         }
@@ -93,6 +96,7 @@ function App() {
             <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
         </Form>
         <Button onClick={handleSubmit} className="start-flight" variant="warning">Start Flight</Button>
+        <p>{startStatus}</p>
         </>
         }
 
