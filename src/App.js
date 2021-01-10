@@ -35,22 +35,27 @@ function App() {
         });
       }, []);
 
+      const [dropHeight, setDropHeight] = useState('')
+      const [dropColumns, setDropColumns] = useState('')
+      const [dropRows, setDropRows] = useState('')
+
   return (
     <div className="App">
       <header className="App-header">
 
         <h1>Seed Planting IoT Drone</h1>
-
+        <h3>{currentTime}</h3>
+        
         <Form>
           <Form.Label>Drop Height</Form.Label>
-          <Form.Control type="number" step="1"/>
+            <Form.Control onChange={e => setDropHeight(e.target.value)} value={dropHeight} type="number" step="1"/>
           <Form.Label>Drop Columns</Form.Label>
-          <Form.Control type="number" step="1"/>
+            <Form.Control onChange={e => setDropColumns(e.target.value)} value={dropColumns} type="number" step="1"/>
           <Form.Label>Drop Rows</Form.Label>
-          <Form.Control type="number" step="1"/>
+            <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number" step="1"/>
         </Form>
-        <Button variant="warning">Start Flight</Button>
-        <h3>{currentTime}</h3>
+        <Button className="start-flight" variant="warning">Start Flight</Button>
+
 
       </header>
     </div>
