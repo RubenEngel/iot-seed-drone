@@ -39,11 +39,11 @@ function App() {
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
 
-      const flightParams = {
+      const flightParams = ({
         dropHeight: dropHeight,
         dropColumns: dropColumns,
         dropRows: dropRows
-      }
+      })
 
       function handleSubmit() {
         console.log(flightParams)
