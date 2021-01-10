@@ -31,15 +31,16 @@ def get_flight_params():
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
     dropSpacing = flight_params['dropSpacing']
-    return 'Done', 201
+    return dropHeight, dropColumns, dropRows, dropSpacing
 
 missionLog = []
+missionLog.append('Total drop rows = {}'.format(dropRows))
+missionLog.append('Total drop columns = {}'.format(dropColumns))
 missionLog.append('Flying to altitude of {}'.format(dropHeight))
 missionLog.append('Reached target altitude')
 missionLog.append('Dropping Seeds')
 missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
-missionLog.append('Total drop rows = {}'.format(dropRows))
-missionLog.append('Total drop columns = {}'.format(dropColumns))
+
 
 ##### GET MISSION LOG   
 
