@@ -21,16 +21,6 @@ function App() {
         }; // disconnect sockets when page unmounts
       }, [])
 
-      useEffect(() => {
-        socket.on('message', (data) => {
-          setMissionLog([...missionLog, data])
-        })
-        socket.on('status', (status) => {
-          if (status === 'complete') {
-            setFlightStarted(false)
-            setMissionLog([])
-          }})  
-      }, [missionLog, socket]);
 
       const [dropHeight, setDropHeight] = useState('')
       const [dropColumns, setDropColumns] = useState('')
@@ -64,6 +54,17 @@ function App() {
       const missionLogList = missionLog.map((log) => 
         <li>{log}</li>
       )
+
+      useEffect(() => {
+        socket.on('message', (data) => {
+          setMissionLog([...missionLog, data])
+        })
+        socket.on('status', (status) => {
+          if (status === 'complete') {
+            setFlightStarted(false)
+            setMissionLog([])
+          }})  
+      }, [missionLog, socket]);
 
 
   return (
