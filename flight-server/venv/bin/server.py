@@ -52,3 +52,7 @@ def get_mission_log():
 @socket.on('connect')
 def on_connect():
     print('user connected')
+
+@socket.on('disconnect')
+def on_disconnect():
+    print('user disconnected')
