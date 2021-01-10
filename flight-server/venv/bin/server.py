@@ -59,5 +59,5 @@ def on_disconnect():
 def on_flight_start():
     count = 0
     while count < 20:
-    emit('message', jsonify('Test {}'.format(count)))
-    time.sleep(1)
+        emit('message', jsonify('Test {}'.format(count)))
+        time.sleep(1)
