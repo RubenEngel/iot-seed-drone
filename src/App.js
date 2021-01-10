@@ -91,7 +91,7 @@ function App() {
         {flightStarted && 
           <div>
             <h3>Mission Log</h3>
-              <ul>{missionLogList}</ul>
+            <ul>{missionLogList}</ul>
           </div>
           }
 
