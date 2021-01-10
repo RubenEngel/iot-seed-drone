@@ -58,4 +58,4 @@ def on_disconnect():
 @socket.on('flight-start')
 def on_flight_start():
     message = 'Test Success'
-    emit('message', jsonify({'message': message })
+    emit('message', jsonify({'message': message }))
