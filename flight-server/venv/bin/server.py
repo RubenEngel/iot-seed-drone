@@ -22,5 +22,5 @@ def get_flight_params():
     
 @app.route('/api/log')
 def get_mission_log():
-    missionLog = ['Test1' 'Test2' 'Test3']
+    missionLog = ['Test1', 'Test2', 'Test3']
     return jsonify({'missionLog' : missionLog})
