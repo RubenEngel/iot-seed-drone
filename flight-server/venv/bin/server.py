@@ -11,12 +11,12 @@ def get_current_time():
     return {'time': datetime.datetime.now()}
 
 @app.route('/api/params', methods = ['POST'])
-def get_flight_params():
+def get_flight_params(request):
     flight_params = request.get_json()
     dropHeight = flight_params['dropHeight']
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
-    print('Done')
+    print(flight_params)
     
 @app.route('/api/log')
 def get_mission_log():
