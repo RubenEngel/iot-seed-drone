@@ -35,16 +35,23 @@ def get_flight_params():
     return 'Done', 201
 
 missionLog = []
-missionLog.append('Total drop rows = {}'.format(dropRows))
-missionLog.append('Total drop columns = {}'.format(dropColumns))
-missionLog.append('Flying to altitude of {}'.format(dropHeight))
-missionLog.append('Reached target altitude')
-missionLog.append('Dropping Seeds')
-missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
+# missionLog.append('Total drop rows = {}'.format(dropRows))
+# missionLog.append('Total drop columns = {}'.format(dropColumns))
+# missionLog.append('Flying to altitude of {}'.format(dropHeight))
+# missionLog.append('Reached target altitude')
+# missionLog.append('Dropping Seeds')
+# missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
 
 
 ##### GET MISSION LOG   
 
 @app.route('/api/log')
 def get_mission_log():
+    global missionLog
+    missionLog.append('Total drop rows = {}'.format(dropRows))
+    missionLog.append('Total drop columns = {}'.format(dropColumns))
+    missionLog.append('Flying to altitude of {}'.format(dropHeight))
+    missionLog.append('Reached target altitude')
+    missionLog.append('Dropping Seeds')
+    missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
     return jsonify({'missionLog' : missionLog})
