@@ -6,28 +6,36 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import io from 'socket.io-client';
 
 function App() {
-
+      const socket = io();
       
-
       const [currentTime, setCurrentTime] = useState(0);
 
       useEffect(() => {
-        const socket = io();
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
         });
-        return () => socket.disconnect(); // disconnect socket when page unmounts
+        socket.on('message', (data) => {
+          setMissionLog([...missionLog, data])
+        })
+        socket.on('status', (status) => {
+          if (status === 'complete') {
+            setFlightStarted(false)
+            setMissionLog([])
+          }})  
+        return () => {
+          socket.off('message')
+          socket.off('status')
+          socket.disconnect()
+        }; // disconnect sockets when page unmounts
       }, []);
 
       const [dropHeight, setDropHeight] = useState('')
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
       const [dropSpacing, setDropSpacing] = useState('')
-
       const [flightStarted, setFlightStarted] = useState(false)
       
       // Submit Flight Parameters to Backend
-
       function submitParams() {
         const flightParams = ({
           dropHeight: dropHeight,
@@ -49,27 +57,10 @@ function App() {
         }
 
         // Mission Log
-
       const [missionLog, setMissionLog] = useState([])
-
       const missionLogList = missionLog.map((log) => 
         <li>{log}</li>
       )
-
-      useEffect(() => {
-        socket.on('message', (data) => {
-          setMissionLog([...missionLog, data])
-        })
-        socket.on('status', (status) => {
-          if (status === 'complete') {
-            setFlightStarted(false)
-            setMissionLog([])
-          }})     
-        return () => {
-          socket.off('mission-log')
-          socket.off('status')
-        }
-         }, [flightStarted, missionLog])
 
 
   return (
