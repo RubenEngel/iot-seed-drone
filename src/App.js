@@ -9,18 +9,7 @@ const socket = io(); // Don't put inside App component
 
 function App() {
       
-      const [currentTime, setCurrentTime] = useState(0);
-
-      useEffect(() => {
-        fetch('/api/time').then(res => res.json()).then(data => {
-          setCurrentTime(data.time); 
-         });
-        return () => {
-          socket.disconnect()
-        }; // disconnect sockets when page unmounts
-      }, [])
-
-
+      const [currentTime, setCurrentTime] = useState();
       const [dropHeight, setDropHeight] = useState('')
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
@@ -54,15 +43,22 @@ function App() {
         <li>{log}</li>
       )
 
-          socket.on('message', (data) => {
-            setMissionLog([...missionLog, data])
-          })
-
-          socket.on('status', (status) => {
-          if (status === 'complete') {
-            setFlightStarted(false)
-            setMissionLog([])
-          }})
+      useEffect(() => {
+        fetch('/api/time').then(res => res.json()).then(data => {
+          setCurrentTime(data.time); 
+         });
+         socket.on('message', (data) => {
+          setMissionLog([...missionLog, data])
+        })
+        socket.on('status', (status) => {
+        if (status === 'complete') {
+          setFlightStarted(false)
+          setMissionLog([])
+        }})
+        return () => {
+          socket.disconnect()
+        }; // disconnect sockets when page unmounts
+      }, [])
 
 
   return (
@@ -70,7 +66,7 @@ function App() {
       <header className="App-header">
 
         <h1>Seed Planting IoT Drone</h1>
-        <h3>{currentTime}</h3>
+        <h3>Server Connected: {currentTime ? currentTime : 'Failed'}</h3>
 
         {!flightStarted && 
         <>

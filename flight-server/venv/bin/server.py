@@ -6,8 +6,8 @@ import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socket = SocketIO(app, cors_allowed_origins="*")
 CORS(app, support_credentials=True)
+socket = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
 
 @app.route('/api/time')
 def get_current_time():
@@ -75,3 +75,6 @@ def on_flight_start():
     emit('message', 'Mission complete.')
     time.sleep(3)
     emit('status', 'complete')
+
+if __name__ == '__main__':
+    socket.run(app)
