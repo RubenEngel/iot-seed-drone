@@ -5,10 +5,9 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import io from 'socket.io-client';
 
-const socket = io();
+const socket = io(); // Don't put inside App component
 
 function App() {
-      
       
       const [currentTime, setCurrentTime] = useState(0);
 
@@ -55,16 +54,18 @@ function App() {
         <li>{log}</li>
       )
 
-      // useEffect(() => {
-        socket.on('message', (data) => {
-          setMissionLog([...missionLog, data])
-        })
-        socket.on('status', (status) => {
+        if (flightStarted === true) {
+          socket.on('message', (data) => {
+            setMissionLog([...missionLog, data])
+          })
+          socket.on('status', (status) => {
           if (status === 'complete') {
             setFlightStarted(false)
             setMissionLog([])
-          }})  
-      // }, [missionLog, socket]);
+            socket.off('status')
+            socket.off('message')
+          }})
+        }
 
 
   return (
