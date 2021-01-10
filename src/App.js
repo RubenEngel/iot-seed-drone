@@ -65,13 +65,13 @@ function App() {
         }
          }, [missionLog])
 
-      while (flightStarted) {
-        socket.on('status', (status) => {
-          if (status === 'complete') {
-            setFlightStarted(false)
-            setMissionLog([])
-          }})
-      } 
+      // while (flightStarted) {
+      //   socket.on('status', (status) => {
+      //     if (status === 'complete') {
+      //       setFlightStarted(false)
+      //       setMissionLog([])
+      //     }})
+      // } 
 
   return (
     <div className="App">
