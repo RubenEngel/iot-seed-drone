@@ -38,6 +38,7 @@ function App() {
       const [dropHeight, setDropHeight] = useState('')
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
+      const [flightStarted, setFlightStarted] = useState(false)
 
       const flightParams = ({
         dropHeight: dropHeight,
@@ -47,6 +48,15 @@ function App() {
 
       function handleSubmit() {
         console.log(flightParams)
+        setFlightStarted(true)
+        if (dropHeight != '' && dropColumns != '' && dropRows != '') {
+          fetch('/api/params', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(flightParams)
+          })
+          .then(response => console.log(response.json()))
+        }
       }
 
   return (
@@ -66,6 +76,10 @@ function App() {
         </Form>
         <Button onClick={handleSubmit} className="start-flight" variant="warning">Start Flight</Button>
 
+        {flightStarted && 
+          <h3>Mission Log</h3>
+          
+          }
 
       </header>
     </div>
