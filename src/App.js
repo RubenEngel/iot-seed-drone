@@ -58,7 +58,7 @@ function App() {
         return () => {
           socket.disconnect()
         }; // disconnect sockets when page unmounts
-      }, [missionLog])
+      }, [])
 
 
   return (
