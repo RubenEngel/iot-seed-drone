@@ -58,9 +58,7 @@ function App() {
 
       useEffect(() => {
         socket.on('message', (data) => {
-          console.log(data)
           setMissionLog([...missionLog, data])
-          console.log(missionLog)
         })
         socket.on('status', (status) => {
           if (status === 'complete') {
