@@ -1,38 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
-// import axios from 'axios';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import io from 'socket.io-client';
+import io from 'socket.io-client';
 
 function App() {
 
-    // const socket = io();
+      const endpoint = 'http://localhost:5000'
 
-    // const [flightStatus, setFlightStatus] = useState('Flight not started')
-    // const [count, setCount] = useState(0)
-
-    // function startFlight() {
-    //   axios({
-    //     method: 'get',
-    //     url: '/flight',
-    //   }).then(res => setFlightStatus(res.data.test))
-    //   .catch(err => console.log(err));
-      
-    //   socket.emit("start");
-    // }
-
-      // socket.on('elapsed time', (data) => {
-      //       setCount(data.count)
-      //     })
-    
       const [currentTime, setCurrentTime] = useState(0);
 
       useEffect(() => {
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
         });
+        const socket = io(endpoint);
       }, []);
 
       const [dropHeight, setDropHeight] = useState('')
@@ -40,11 +23,11 @@ function App() {
       const [dropRows, setDropRows] = useState('')
       const [dropSpacing, setDropSpacing] = useState('')
 
-      const [startStatus, setStartStatus] = useState('')
       const [flightStarted, setFlightStarted] = useState(false)
-      const [missionLog, setMissionLog] = useState([])
+      
+      // Submit Flight Parameters to Backend
 
-      function handleSubmit() {
+      function submitParams() {
         const flightParams = ({
           dropHeight: dropHeight,
           dropColumns: dropColumns,
@@ -52,8 +35,7 @@ function App() {
           dropSpacing: dropSpacing
         })
         console.log(flightParams)
-        if (dropHeight !== '' && dropColumns !== '' && dropRows !== '') {
-          setStartStatus('Starting flight...')
+        if (dropHeight !== '' && dropColumns !== '' && dropRows !== '' && dropSpacing !== '') {
           fetch('/api/params', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -63,6 +45,10 @@ function App() {
           .catch(err => console.log(err))
         }
         }
+
+        // Mission Log
+
+      const [missionLog, setMissionLog] = useState([])
 
       function getMissionLog() {
         fetch('/api/log', {
@@ -95,8 +81,7 @@ function App() {
           <Form.Label>Drop Spacing</Form.Label>
             <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
         </Form>
-        <Button onClick={handleSubmit} className="start-flight" variant="warning">Start Flight</Button>
-        <p>{startStatus}</p>
+        <Button onClick={submitParams} className="start-flight" variant="warning">Start Flight</Button>
         </>
         }
 

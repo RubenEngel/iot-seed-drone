@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+socket = SocketIO(app)
 CORS(app, support_credentials=True)
 
 @app.route('/api/time')
@@ -48,3 +48,7 @@ def get_mission_log():
     missionLog.append('Dropping Seeds')
     missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
     return jsonify({'missionLog' : missionLog})
+
+@socket.on('connect')
+def on_connect():
+    print('user connected')
