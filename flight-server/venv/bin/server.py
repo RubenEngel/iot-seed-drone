@@ -3,7 +3,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
 import time
-import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
