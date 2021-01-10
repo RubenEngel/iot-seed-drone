@@ -7,15 +7,13 @@ import io from 'socket.io-client';
 
 function App() {
 
-      const endpoint = 'http://localhost:5000'
-
       const [currentTime, setCurrentTime] = useState(0);
 
       useEffect(() => {
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
         });
-        const socket = io(endpoint);
+        const socket = io();
       }, []);
 
       const [dropHeight, setDropHeight] = useState('')
