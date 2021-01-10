@@ -15,7 +15,8 @@ function App() {
       const [dropRows, setDropRows] = useState('')
       const [dropSpacing, setDropSpacing] = useState('')
       const [flightStarted, setFlightStarted] = useState(false)
-      
+      const [startingFlight, setStartingFlight] = useState('')
+
       // Submit Flight Parameters to Backend
       function submitParams() {
         const flightParams = ({
@@ -31,9 +32,12 @@ function App() {
             body: JSON.stringify(flightParams)
           }).then(res => console.log(res.ok))
           .then(() => setFlightStarted(true))
+          .then(() => {
+            socket.emit('flight-start')
+            setStartingFlight('Sending Flight Parameters..')
+          })
           .catch(err => console.log(err))
         }
-        socket.emit('flight-start')
         }
 
         // Mission Log
@@ -59,45 +63,38 @@ function App() {
         }; // disconnect sockets when page unmounts
       }, [])
 
-      useEffect(()=>{
-
-      }, [missionLog])
-
 
   return (
     <div className="App">
       <header className="App-header">
-
         <h1>Seed Planting IoT Drone</h1>
-        <h3>Server Connected: {currentTime ? currentTime : 'Failed'}</h3>
-
-        {!flightStarted && 
-        <>
-        <Form>
-          <Form.Label>Drop Height</Form.Label>
-            <Form.Control onChange={e => setDropHeight(e.target.value)} value={dropHeight} type="number"/>
-          <Form.Label>Drop Columns</Form.Label>
-            <Form.Control onChange={e => setDropColumns(e.target.value)} value={dropColumns} type="number"/>
-          <Form.Label>Drop Rows</Form.Label>
-            <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number"/>
-          <Form.Label>Drop Spacing</Form.Label>
-            <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
-        </Form>
-        <Button onClick={submitParams} className="start-flight" variant="warning">Start Flight</Button>
-        </>
-        }
-
-        {flightStarted && 
-          <div>
-            <h3>Mission Log</h3>
-            {/* <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button> */}
-            <div className='mission-log'>
-              <ul>{missionLogList}</ul>
-            </div>
+        <h3>{currentTime ? `Server connected on: ${currentTime}`: 'Awaiting connection..'}</h3>
+        </header>
+        
+        {!flightStarted ?
+        <div className='App-content'>
+          <Form>
+            <Form.Label>Drop Height</Form.Label>
+              <Form.Control onChange={e => setDropHeight(e.target.value)} value={dropHeight} type="number"/>
+            <Form.Label>Drop Columns</Form.Label>
+              <Form.Control onChange={e => setDropColumns(e.target.value)} value={dropColumns} type="number"/>
+            <Form.Label>Drop Rows</Form.Label>
+              <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number"/>
+            <Form.Label>Drop Spacing</Form.Label>
+              <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
+          </Form>
+          <Button onClick={submitParams} className="start-flight" variant="warning">Start Flight</Button>
+          <h3>{startingFlight}</h3>
+        </div>
+        :
+        <div>
+          <h3>Mission Log</h3>
+          <div className='mission-log'>
+            <ul>{missionLogList}</ul>
           </div>
-          }
-
-      </header>
+        </div>
+        }
+      
     </div>
   );
 }
