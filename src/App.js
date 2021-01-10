@@ -24,7 +24,6 @@ function App() {
           dropRows: dropRows,
           dropSpacing: dropSpacing
         })
-        console.log(flightParams)
         if (dropHeight !== '' && dropColumns !== '' && dropRows !== '' && dropSpacing !== '') {
           fetch('/api/params', {
             method: 'POST',
