@@ -11,7 +11,7 @@ def get_current_time():
     return {'time': datetime.datetime.now()}
 
 @app.route('/api/params', methods = ['POST'])
-def get_flight_params(request):
+def get_flight_params():
     flight_params = request.get_json()
     dropHeight = flight_params['dropHeight']
     dropColumns = flight_params['dropColumns']
