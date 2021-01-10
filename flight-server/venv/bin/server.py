@@ -53,11 +53,25 @@ def on_connect():
 
 @socket.on('flight-start')
 def on_flight_start():
-    count = 0
-    while count < 10:
-        time.sleep(2)
-        count = count+1
-        message = 'Test Success {}'.format(count)
-        emit('message', message)
-        print(count)
+    # count = 0
+    # while count < 10:
+    #     time.sleep(2)
+    #     count = count+1
+    #     message = 'Test Success {}'.format(count)
+    #     emit('message', message)
+    #     print(count)
+    emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
+    time.sleep(dropHeight)
+    emit('message', 'Altitude reached.')
+    time.sleep(1)
+    emit('message', 'Dropping seeds..')
+    time.sleep(3)
+    emit('message', 'Flying to next way point {}m away..'.format(dropSpacing))
+    time.sleep(dropSpacing)
+    emit('message', 'Destination reached.')
+    time.sleep(1)
+    emit('message', 'Dropping seeds..')
+    time.sleep(3)
+    emit('message', 'Mission complete.')
+    time.sleep(3)
     emit('status', 'complete')
