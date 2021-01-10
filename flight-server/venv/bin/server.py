@@ -60,3 +60,4 @@ def on_flight_start():
         message = 'Test Success {}'.format(count)
         emit('message', message)
         print(count)
+    emit('status', 'complete')
