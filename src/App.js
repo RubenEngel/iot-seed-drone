@@ -54,18 +54,15 @@ function App() {
         <li>{log}</li>
       )
 
-        if (flightStarted === true) {
           socket.on('message', (data) => {
             setMissionLog([...missionLog, data])
           })
+
           socket.on('status', (status) => {
           if (status === 'complete') {
             setFlightStarted(false)
             setMissionLog([])
-            socket.off('status')
-            socket.off('message')
           }})
-        }
 
 
   return (
