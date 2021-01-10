@@ -58,6 +58,6 @@ def on_disconnect():
 @socket.on('flight-start')
 def on_flight_start():
     count = 0
-    while count < 20
+    while count < 20:
     emit('message', jsonify('Test {}'.format(count)))
     time.sleep(1)
