@@ -56,3 +56,24 @@ def on_connect():
 @socket.on('disconnect')
 def on_disconnect():
     print('user disconnected')
+
+@socket.on('flight-start')
+def on_flight_start():
+    global missionLog
+    missionLog.append('Total drop rows = {}'.format(dropRows))
+    emit('mission-log', jsonify({'missionLog' : missionLog}))
+    time.sleep(2)
+    missionLog.append('Total drop columns = {}'.format(dropColumns))
+    emit('mission-log', jsonify({'missionLog' : missionLog}))
+    time.sleep(2)
+    missionLog.append('Flying to altitude of {}'.format(dropHeight))
+    emit('mission-log', jsonify({'missionLog' : missionLog}))
+    time.sleep(2)
+    missionLog.append('Reached target altitude')
+    emit('mission-log', jsonify({'missionLog' : missionLog}))
+    time.sleep(2)
+    missionLog.append('Dropping Seeds')
+    emit('mission-log', jsonify({'missionLog' : missionLog}))
+    time.sleep(2)
+    missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
+    emit('mission-log', jsonify({'missionLog' : missionLog}))

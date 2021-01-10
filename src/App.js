@@ -49,20 +49,24 @@ function App() {
 
       const [missionLog, setMissionLog] = useState([])
 
-      function getMissionLog() {
-        fetch('/api/log', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        }).then(res => res.json()).then(data => setMissionLog(data.missionLog))
+      function getMissionLog(data) {
+        // fetch('/api/log', {
+        //   method: 'GET',
+        //   headers: { 'Content-Type': 'application/json' }
+        // }).then(res => res.json()).then(data => setMissionLog(data.missionLog))
+        console.log(data)
+        setMissionLog(data)
       }
       
       const missionLogList = missionLog.map((log) => 
         <li>{log}</li>
       )
 
-      // useEffect(() => {
-      //   getMissionLog()
-      // }, [missionLog])
+      useEffect(() => {
+       socket.on('mission-log', getMissionLog)
+
+       return () => {socket.off('mission-log')}
+      }, [missionLog])
 
   return (
     <div className="App">
