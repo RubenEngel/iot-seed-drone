@@ -23,6 +23,7 @@ dropSpacing = 0
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
     flight_params = request.get_json()
+    print(flight_params)
     global dropHeight
     global dropColumns
     global dropRows
@@ -31,7 +32,7 @@ def get_flight_params():
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
     dropSpacing = flight_params['dropSpacing']
-    return dropHeight, dropColumns, dropRows, dropSpacing
+    return 'Done', 201
 
 missionLog = []
 missionLog.append('Total drop rows = {}'.format(dropRows))
