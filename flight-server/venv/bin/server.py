@@ -62,5 +62,5 @@ def on_flight_start():
         time.sleep(1)
         message = 'Test {}'.format(count)
         emit('message', jsonify({'message': message })
-    return None
+    print('Test done')
         
