@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// import Button from 'react-bootstrap/Button'
+import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
 // import axios from 'axios';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -40,7 +41,15 @@ function App() {
 
         <h1>Seed Planting IoT Drone</h1>
 
-        {/* <div><Button onClick={startFlight} variant="warning">Start Flight</Button></div> */}
+        <Form>
+          <Form.Label>Drop Height</Form.Label>
+          <Form.Control type="number" step="1"/>
+          <Form.Label>Drop Columns</Form.Label>
+          <Form.Control type="number" step="1"/>
+          <Form.Label>Drop Rows</Form.Label>
+          <Form.Control type="number" step="1"/>
+        </Form>
+        <Button onClick={startFlight} variant="warning">Start Flight</Button>
         <h3>{currentTime}</h3>
 
       </header>
