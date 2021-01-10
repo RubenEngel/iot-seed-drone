@@ -72,6 +72,7 @@ function App() {
           console.log(data)
           setMissionLog([...missionLog, data])
           console.log(missionLog)
+        })
         return () => {socket.off('mission-log')}
          }, [missionLog])
 
