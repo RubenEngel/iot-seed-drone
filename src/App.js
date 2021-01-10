@@ -15,8 +15,6 @@ function App() {
           setCurrentTime(data.time); 
          });
         return () => {
-          socket.off('message')
-          socket.off('status')
           socket.disconnect()
         }; // disconnect sockets when page unmounts
       }, [])
@@ -55,7 +53,7 @@ function App() {
         <li>{log}</li>
       )
 
-      useEffect(() => {
+      // useEffect(() => {
         socket.on('message', (data) => {
           setMissionLog([...missionLog, data])
         })
@@ -64,7 +62,7 @@ function App() {
             setFlightStarted(false)
             setMissionLog([])
           }})  
-      }, [missionLog, socket]);
+      // }, [missionLog, socket]);
 
 
   return (
