@@ -7,16 +7,16 @@ import io from 'socket.io-client';
 
 function App() {
 
+      
+
       const [currentTime, setCurrentTime] = useState(0);
 
       useEffect(() => {
+        const socket = io();
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
-          const socket = io();
-          return () => socket.disconnect();
         });
-        
-        // return () => { socket.disconnect() }; // disconnect socket when page unmounts
+        return () => socket.disconnect(); // disconnect socket when page unmounts
       }, []);
 
       const [dropHeight, setDropHeight] = useState('')
