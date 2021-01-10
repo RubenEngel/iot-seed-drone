@@ -1,10 +1,10 @@
 from flask import Flask, jsonify
-from flask_cors import CORS
+# from flask_cors import CORS
 import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-CORS(app)
+# CORS(app)
 
 @app.route('/api/time')
 def get_current_time():
