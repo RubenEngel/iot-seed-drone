@@ -19,9 +19,12 @@ dropRows = 0
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
     flight_params = request.get_json()
-    global dropHeight = flight_params['dropHeight']
-    global dropColumns = flight_params['dropColumns']
-    global dropRows = flight_params['dropRows']
+    global dropHeight
+    global dropColumns
+    global dropRows
+    dropHeight = flight_params['dropHeight']
+    dropColumns = flight_params['dropColumns']
+    dropRows = flight_params['dropRows']
 
 
 @app.route('/api/log')
