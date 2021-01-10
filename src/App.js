@@ -48,6 +48,7 @@ function App() {
           setCurrentTime(data.time); 
          });
          socket.on('message', (data) => {
+          console.log(missionLog)
           setMissionLog([...missionLog, data])
         })
         socket.on('status', (status) => {
