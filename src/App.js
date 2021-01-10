@@ -64,9 +64,10 @@ function App() {
         <li>{log}</li>
       )
 
-      useEffect(() => {
-       socket.on('mission-log', getMissionLog)
+      socket.on('mission-log', getMissionLog)
 
+      useEffect(() => {
+        
        return () => {socket.off('mission-log')}
       }, [missionLog])
 
