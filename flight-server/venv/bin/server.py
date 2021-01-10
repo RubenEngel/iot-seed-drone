@@ -51,10 +51,6 @@ def get_flight_params():
 def on_connect():
     print('user connected')
 
-@socket.on('disconnect')
-def on_disconnect():
-    print('user disconnected')
-
 @socket.on('flight-start')
 def on_flight_start():
     count = 0
@@ -62,5 +58,5 @@ def on_flight_start():
         time.sleep(2)
         count = count+1
         message = 'Test Success {}'.format(count)
-        emit('message', jsonify({'message': message }))
+        emit('message', jsonify(message=message))
         print(count)
