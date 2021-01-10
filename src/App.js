@@ -48,8 +48,7 @@ function App() {
           setCurrentTime(data.time); 
          });
          socket.on('message', (data) => {
-          console.log(missionLog)
-          setMissionLog([...missionLog, data])
+          setMissionLog(missionLog => [...missionLog, data])
         })
         socket.on('status', (status) => {
         if (status === 'complete') {
@@ -60,6 +59,10 @@ function App() {
           socket.disconnect()
         }; // disconnect sockets when page unmounts
       }, [])
+
+      useEffect(()=>{
+
+      }, [missionLog])
 
 
   return (
