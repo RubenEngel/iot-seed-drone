@@ -13,7 +13,7 @@ function App() {
         fetch('/api/time').then(res => res.json()).then(data => {
           setCurrentTime(data.time);
         });
-        const socket = io();
+        // const socket = io();
       }, []);
 
       const [dropHeight, setDropHeight] = useState('')
