@@ -39,14 +39,14 @@ function App() {
       const [dropColumns, setDropColumns] = useState('')
       const [dropRows, setDropRows] = useState('')
       const [flightStarted, setFlightStarted] = useState(false)
-
-      const flightParams = ({
-        dropHeight: dropHeight,
-        dropColumns: dropColumns,
-        dropRows: dropRows
-      })
+      const [missionLog, setMissionLog] = useState([])
 
       function handleSubmit() {
+        const flightParams = ({
+          dropHeight: dropHeight,
+          dropColumns: dropColumns,
+          dropRows: dropRows
+        })
         console.log(flightParams)
         if (dropHeight !== '' && dropColumns !== '' && dropRows !== '') {
           setFlightStarted(true)
@@ -57,6 +57,18 @@ function App() {
           }).then(res => res.json()).then(data => console.log(data))
         }
         }
+
+      function getMissionLog() {
+        fetch('/api/log', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(res => res.json()).then(data => console.log(data))
+      }
+      
+      const missionLogList = missionLog.map((log) => 
+        <li>{log}</li>
+      )
+
 
   return (
     <div className="App">
@@ -74,10 +86,13 @@ function App() {
             <Form.Control onChange={e => setDropRows(e.target.value)} value={dropRows} type="number" step="1"/>
         </Form>
         <Button onClick={handleSubmit} className="start-flight" variant="warning">Start Flight</Button>
+        <Button onClick={getMissionLog} className="start-flight" variant="warning">Get Mission Log</Button>
 
         {flightStarted && 
-          <h3>Mission Log</h3>
-          
+          <div>
+            <h3>Mission Log</h3>
+              <ul>{missionLogList}</ul>
+          </div>
           }
 
       </header>

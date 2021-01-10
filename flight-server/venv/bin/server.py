@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 CORS(app, support_credentials=True)
 
 @app.route('/api/time')
