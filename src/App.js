@@ -49,7 +49,7 @@ function App() {
           <Form.Label>Drop Rows</Form.Label>
           <Form.Control type="number" step="1"/>
         </Form>
-        <Button onClick={startFlight} variant="warning">Start Flight</Button>
+        <Button variant="warning">Start Flight</Button>
         <h3>{currentTime}</h3>
 
       </header>
