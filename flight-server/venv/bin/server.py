@@ -25,7 +25,7 @@ def get_flight_params():
     dropHeight = flight_params['dropHeight']
     dropColumns = flight_params['dropColumns']
     dropRows = flight_params['dropRows']
-    return None
+    return 'Done', 201
 
 
 @app.route('/api/log')
