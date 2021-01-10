@@ -34,8 +34,6 @@ def get_flight_params():
     dropSpacing = flight_params['dropSpacing']
     return 'Done', 201
 
-missionLog = []
-
 ##### GET MISSION LOG   
 
 # @app.route('/api/log')
@@ -59,27 +57,7 @@ def on_disconnect():
 
 @socket.on('flight-start')
 def on_flight_start():
-    global missionLog
-    missionLog.append('Total drop rows = {}'.format(dropRows))
-    emit('mission-log', jsonify({'missionLog' : missionLog}))
-    print(missionLog)
-    time.sleep(2)
-    missionLog.append('Total drop columns = {}'.format(dropColumns))
-    emit('mission-log', jsonify({'missionLog' : missionLog}))
-    print(missionLog)
-    time.sleep(2)
-    missionLog.append('Flying to altitude of {}'.format(dropHeight))
-    emit('mission-log', jsonify({'missionLog' : missionLog}))
-    print(missionLog)
-    time.sleep(2)
-    missionLog.append('Reached target altitude')
-    emit('mission-log', jsonify({'missionLog' : missionLog}))
-    print(missionLog)
-    time.sleep(2)
-    missionLog.append('Dropping Seeds')
-    emit('mission-log', jsonify({'missionLog' : missionLog}))
-    print(missionLog)
-    time.sleep(2)
-    missionLog.append('Moving {}m, to next waypoint..'.format(dropSpacing))
-    emit('mission-log', jsonify({'missionLog' : missionLog}))
-    print(missionLog)
+    count = 0
+    while count < 20
+    emit('message', jsonify('Test {}'.format(count)))
+    time.sleep(1)
