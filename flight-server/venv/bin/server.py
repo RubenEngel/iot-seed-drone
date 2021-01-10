@@ -24,5 +24,5 @@ def get_flight_params():
 
 @app.route('/api/log')
 def get_mission_log():
-    missionLog.append('Flying to altitude of {}'.format(dropHeight))
-    return jsonify({'missionLog' : missionLog})
+    get_flight_params.missionLog.append('Flying to altitude of {}'.format(get_flight_params.dropHeight))
+    return jsonify({'missionLog' : get_flight_params.missionLog})
