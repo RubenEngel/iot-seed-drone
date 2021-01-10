@@ -39,8 +39,8 @@ function App() {
 
         // Mission Log
       const [missionLog, setMissionLog] = useState([])
-      const missionLogList = missionLog.map((log) => 
-        <li>{log}</li>
+      const missionLogList = missionLog.map((log, index) => 
+        <li key={index}>{log}</li>
       )
 
       useEffect(() => {
