@@ -55,10 +55,11 @@ function App() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(flightParams)
           })
-        }
-        if (response.ok) {
+          if (response.ok) {
           console.log('response worked')
         }
+        }
+        
 
       }
 
