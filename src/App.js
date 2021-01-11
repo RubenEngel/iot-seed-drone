@@ -5,7 +5,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000'); // Don't put inside App component
+const socket = io('http://127.0.0.1:5000/'); // Don't put inside App component
 
 function App() {
       
