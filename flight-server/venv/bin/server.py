@@ -40,7 +40,6 @@ def on_connect():
 
 @socket.on('flight-start')
 def on_flight_start():
-
     emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
     time.sleep(int(dropHeight))
     emit('message', 'Altitude reached.')
