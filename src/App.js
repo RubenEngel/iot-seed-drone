@@ -31,9 +31,9 @@ function App() {
             body: JSON.stringify(flightParams)
           }).then(res => console.log(res.ok))
           .then(() => setFlightStarted(true))
+          .then(() => socket.emit('flight-start'))
           .catch(err => console.log(err))
         }
-        socket.emit('flight-start')
         }
 
         // Mission Log
