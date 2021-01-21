@@ -33,6 +33,8 @@ function App() {
           .then(() => setFlightStarted(true))
           .then(() => socket.emit('flight-start'))
           .catch(err => console.log(err))
+        } else {
+          console.log('Specify all parameters')
         }
         }
 
@@ -59,9 +61,9 @@ function App() {
         }; // disconnect sockets when page unmounts
       }, [])
 
-      useEffect(()=>{
+      // useEffect(()=>{
 
-      }, [missionLog])
+      // }, [missionLog])
 
 
   return (
