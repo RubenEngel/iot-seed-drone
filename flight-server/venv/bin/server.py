@@ -35,38 +35,28 @@ def get_flight_params():
     dropSpacing = flight_params['dropSpacing']
     return 'Done', 201
 
-# @app.route('/api/open', methods = ['POST'])
-# def open_motor():
-#     subprocess.call(['python', 'open.py'])
-
-# @app.route('/api/close', methods = ['POST'])
-# def close_motor():
-#     subprocess.call(['python', 'close.py'])
-
 @socket.on('connect')
 def on_connect():
     print('user connected')
+
+def dropSeeds():
+    time.sleep(1)
+    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'])
+    emit('message', 'Dropping seeds..')
+    time.sleep(3)
+    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'])
+    time.sleep(1)
 
 @socket.on('flight-start')
 def on_flight_start():
     emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
     time.sleep(int(dropHeight))
     emit('message', 'Altitude reached.')
-    time.sleep(1)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'], env={})
-    emit('message', 'Dropping seeds..')
-    time.sleep(3)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'], env={})
-    time.sleep(1)
+    dropSeeds()
     emit('message', 'Flying to next way point {}m away..'.format(dropSpacing))
     time.sleep(int(dropSpacing))
     emit('message', 'Destination reached.')
-    time.sleep(1)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'], env={})
-    emit('message', 'Dropping seeds..')
-    time.sleep(3)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'], env={})
-    time.sleep(1)
+    dropSeeds()
     emit('message', 'Mission complete.')
     time.sleep(3)
     emit('status', 'complete')
