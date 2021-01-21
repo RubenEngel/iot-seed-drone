@@ -28,6 +28,14 @@ def connectMyCopter():
 
 	return vehicle
 
+def dropSeeds():
+    time.sleep(1)
+    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'])
+    emit('message', 'Dropping seeds..')
+    time.sleep(3)
+    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'])
+    time.sleep(1)
+
 def arm_and_takeoff(targetHeight):
 	while vehicle.is_armable != True:
 		print("Waiting for vehicle to become armable")
@@ -92,8 +100,8 @@ def velocity_magnitude():
 
 def goto_relative_to_current_location(north, east, down):
 	goto_position_target_local_ned(north, east, down)
-        while velocity_magnitude() < 0.125:
-                time.sleep(0.5)
+    while velocity_magnitude() < 0.125:
+        time.sleep(0.5)
 	while velocity_magnitude() > 0.125:
 		print 'Velocity: {}'.format(velocity_magnitude())
 		print "{}".format(vehicle.location.local_frame)
@@ -110,7 +118,7 @@ def seed_planting_mission(rows, columns):
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
 			time.sleep(1)
 			print('Dropping seeds.') # drop seeds
-			time.sleep(3)
+			dropSeeds(3)
 
 			print('-----')
 

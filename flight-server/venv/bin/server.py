@@ -39,11 +39,11 @@ def get_flight_params():
 def on_connect():
     print('user connected')
 
-def dropSeeds():
+def dropSeeds(time):
     time.sleep(1)
     subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'])
     emit('message', 'Dropping seeds..')
-    time.sleep(3)
+    time.sleep(time)
     subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'])
     time.sleep(1)
 
@@ -52,11 +52,11 @@ def on_flight_start():
     emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
     time.sleep(int(dropHeight))
     emit('message', 'Altitude reached.')
-    dropSeeds()
+    dropSeeds(3)
     emit('message', 'Flying to next way point {}m away..'.format(dropSpacing))
     time.sleep(int(dropSpacing))
     emit('message', 'Destination reached.')
-    dropSeeds()
+    dropSeeds(3)
     emit('message', 'Mission complete.')
     time.sleep(3)
     emit('status', 'complete')
