@@ -49,23 +49,26 @@ def on_connect():
 
 @socket.on('flight-start')
 def on_flight_start():
-    subprocess.call(['python', 'open.py'])
     emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
     time.sleep(int(dropHeight))
     emit('message', 'Altitude reached.')
     time.sleep(1)
+    subprocess.call(['python', 'open.py'])
     emit('message', 'Dropping seeds..')
     time.sleep(3)
+    subprocess.call(['python', 'close.py'])
     emit('message', 'Flying to next way point {}m away..'.format(dropSpacing))
     time.sleep(int(dropSpacing))
     emit('message', 'Destination reached.')
     time.sleep(1)
+    subprocess.call(['python', 'open.py'])
     emit('message', 'Dropping seeds..')
     time.sleep(3)
+    subprocess.call(['python', 'close.py'])
     emit('message', 'Mission complete.')
     time.sleep(3)
     emit('status', 'complete')
-    subprocess.call(['python', 'close.py'])
+    
 
 if __name__ == '__main__':
     socket.run(app)
