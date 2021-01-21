@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
 import time
+import subprocess
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -38,23 +39,28 @@ def get_flight_params():
 def on_connect():
     print('user connected')
 
+def dropSeeds(time):
+    time.sleep(1)
+    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'])
+    emit('message', 'Dropping seeds..')
+    time.sleep(time)
+    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'])
+    time.sleep(1)
+
 @socket.on('flight-start')
 def on_flight_start():
     emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
     time.sleep(int(dropHeight))
     emit('message', 'Altitude reached.')
-    time.sleep(1)
-    emit('message', 'Dropping seeds..')
-    time.sleep(3)
+    dropSeeds(3)
     emit('message', 'Flying to next way point {}m away..'.format(dropSpacing))
     time.sleep(int(dropSpacing))
     emit('message', 'Destination reached.')
-    time.sleep(1)
-    emit('message', 'Dropping seeds..')
-    time.sleep(3)
+    dropSeeds(3)
     emit('message', 'Mission complete.')
     time.sleep(3)
     emit('status', 'complete')
+    
 
 if __name__ == '__main__':
     socket.run(app)

@@ -100,8 +100,8 @@ def velocity_magnitude():
 
 def goto_relative_to_current_location(north, east, down):
 	goto_position_target_local_ned(north, east, down)
-    while velocity_magnitude() < 0.125:
-        time.sleep(0.5)
+	while velocity_magnitude() < 0.125:
+		time.sleep(0.5)
 	while velocity_magnitude() > 0.125:
 		print 'Velocity: {}'.format(velocity_magnitude())
 		print "{}".format(vehicle.location.local_frame)
