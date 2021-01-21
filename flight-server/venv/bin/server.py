@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
 import time
+import subprocess
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -40,6 +41,7 @@ def on_connect():
 
 @socket.on('flight-start')
 def on_flight_start():
+    subprocess.call(['python', 'open.py'])
     emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
     time.sleep(int(dropHeight))
     emit('message', 'Altitude reached.')
@@ -55,6 +57,7 @@ def on_flight_start():
     emit('message', 'Mission complete.')
     time.sleep(3)
     emit('status', 'complete')
+    subprocess.call(['python', 'close.py'])
 
 if __name__ == '__main__':
     socket.run(app)
