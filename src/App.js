@@ -38,6 +38,20 @@ function App() {
         }
         }
 
+        function handleOpen() {
+          fetch('/api/open', {
+            method: 'POST'
+          }).then(res => console.log(res.ok))
+          .then(() => console.log('opened motor'))
+        }
+
+        function handleClose() {
+          fetch('/api/close', {
+            method: 'POST'
+          }).then(res => console.log(res.ok))
+          .then(() => console.log('closed motor'))
+        }
+
         // Mission Log
       const [missionLog, setMissionLog] = useState([])
       const missionLogList = missionLog.map((log, index) => 
@@ -86,6 +100,8 @@ function App() {
             <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
         </Form>
         <Button onClick={submitParams} className="start-flight" variant="warning">Start Flight</Button>
+        <Button onClick={handleOpen}>Open Motor</Button>
+        <Button onClick={handleClose}>Close Motor</Button>
         </>
         }
 

@@ -35,6 +35,14 @@ def get_flight_params():
     dropSpacing = flight_params['dropSpacing']
     return 'Done', 201
 
+@app.route('/api/open', methods = ['POST'])
+def open_motor():
+    subprocess.call(['python', 'open.py'])
+
+@app.route('/api/close', methods = ['POST'])
+def close_motor():
+    subprocess.call(['python', 'close.py'])
+
 @socket.on('connect')
 def on_connect():
     print('user connected')
