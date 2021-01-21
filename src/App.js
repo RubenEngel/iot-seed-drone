@@ -100,8 +100,8 @@ function App() {
             <Form.Control onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} type="number"/>
         </Form>
         <Button onClick={submitParams} className="start-flight" variant="warning">Start Flight</Button>
-        <Button onClick={handleOpen}>Open Motor</Button>
-        <Button onClick={handleClose}>Close Motor</Button>
+        {/* <Button onClick={handleOpen}>Open Motor</Button>
+        <Button onClick={handleClose}>Close Motor</Button> */}
         </>
         }
 
