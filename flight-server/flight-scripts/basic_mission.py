@@ -1,5 +1,4 @@
 ###### Dependencies ######
-
 from dronekit import connect, VehicleMode, LocationGlobalRelative, APIException
 import time
 import socket
@@ -7,7 +6,7 @@ import exceptions
 import math
 import argparse
 from pymavlink import mavutil
-
+import serial
 
 ##### Functions ######
 
@@ -28,13 +27,22 @@ def connectMyCopter():
 
 	return vehicle
 
-def dropSeeds():
-    time.sleep(1)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'])
-    emit('message', 'Dropping seeds..')
-    time.sleep(3)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'])
-    time.sleep(1)
+def drop_seeds():	
+	try:	
+		ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+		def open_motor():
+			ser.flush()
+			ser.write(b'1')
+		def close_motor():
+			ser.flush()
+			ser.write(b'0')
+		open_motor()
+		print('Dropping seeds..')
+		time.sleep(3)
+		close_motor()
+		time.sleep(1)
+	except:
+		print('Error actuating.')
 
 def arm_and_takeoff(targetHeight):
 	while vehicle.is_armable != True:
@@ -65,77 +73,93 @@ def arm_and_takeoff(targetHeight):
 	print("Target altitude reached")
 	return None
 
-def goto_position_target_local_ned(north, east, down):
-    """	
-    Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified 
-    location in the North, East, Down frame.
-
-    It is important to remember that in this frame, positive altitudes are entered as negative 
-    "Down" values. So if down is "10", this will be 10 metres below the home altitude.
-
-    Starting from AC3.3 the method respects the frame setting. Prior to that the frame was
-    ignored. For more information see: 
-    http://dev.ardupilot.com/wiki/copter-commands-in-guided-mode/#set_position_target_local_ned
-
-    See the above link for information on the type_mask (0=enable, 1=ignore). 
-    At time of writing, acceleration and yaw bits are ignored.
-
-    """
-    msg = vehicle.message_factory.set_position_target_local_ned_encode(
-        0,       # time_boot_ms (not used)
-        0, 0,    # target system, target component
-        mavutil.mavlink.MAV_FRAME_BODY_NED, # frame
-        0b0000111111111000, # type_mask (only positions enabled)
-        north, east, down, # x, y, z positions (or North, East, Down in the MAV_FRAME_BODY_NED frame
-        0, 0, 0, # x, y, z velocity in m/s  (not used)
-        0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
-        0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
-    # send command to vehicle
-    vehicle.send_mavlink(msg)
-
-def velocity_magnitude():
-	velocity_vector = vehicle.velocity
-	magnitude = math.sqrt(velocity_vector[0]**2 + velocity_vector[1]**2 + velocity_vector[2]**2)
-	return magnitude
-
 def goto_relative_to_current_location(north, east, down):
-	goto_position_target_local_ned(north, east, down)
-	while velocity_magnitude() < 0.125:
-		time.sleep(0.5)
-	while velocity_magnitude() > 0.125:
-		print 'Velocity: {}'.format(velocity_magnitude())
-		print "{}".format(vehicle.location.local_frame)
-		print "-----"
+	"""	
+	Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified 
+	location in the North, East, Down frame.
+	It is important to remember that in this frame, positive altitudes are entered as negative 
+	"Down" values. So if down is "10", this will be 10 metres below the home altitude.
+	"""
+	msg = vehicle.message_factory.set_position_target_local_ned_encode(
+		0,       # time_boot_ms (not used)
+		0, 0,    # target system, target component
+		mavutil.mavlink.MAV_FRAME_BODY_NED, # frame
+		0b0000111111111000, # type_mask (only positions enabled)
+		north, east, down, # x, y, z positions (or North, East, Down in the MAV_FRAME_BODY_NED frame
+		0, 0, 0, # x, y, z velocity in m/s  (not used)
+		0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
+		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
+	# send command to vehicle
+	vehicle.send_mavlink(msg)
+	while vehicle.airspeed < 0.1:
+		time.sleep(1)
+	while vehicle.airspeed > 0.1:
+		print("{}".format(vehicle.airspeed))
+		print('{}'.format(vehicle.location.local_frame))
+		print('-----')
 		time.sleep(1)
 	print('destination reached')
-	time.sleep(1)
+
+def move_forward(dropSpacing):
+	goto_relative_to_current_location(dropSpacing, 0, 0)
+
+def set_yaw(heading, clockwise, relative=True):
+	if relative:
+		is_relative=1 #yaw relative to direction of travel
+	else:
+		is_relative=0 #yaw is an absolute angle
+	# create the CONDITION_YAW command using command_long_encode()
+	initial_heading = vehicle.heading
+	msg = vehicle.message_factory.command_long_encode(
+		0, 0,    # target system, target component
+		mavutil.mavlink.MAV_CMD_CONDITION_YAW, #command
+		0, #confirmation
+		heading,    # param 1, yaw in degrees
+		0,          # param 2, yaw speed deg/s
+		clockwise,	# param 3, direction -1 ccw, 1 cw
+		is_relative, # param 4, relative offset 1, absolute angle 0
+		0, 0, 0)    # param 5 ~ 7 not used
+	# send command to vehicle
+	vehicle.send_mavlink(msg)
+	time.sleep(3)
+
+def turn_right():
+	set_yaw(90, 1)
+
+def turn_left():
+	set_yaw(90, -1)
 
 def seed_planting_mission(rows, columns):
 	for column in range(1, dropColumns+1): # range does not include last value, so +1
+
+		drop_seeds()
 
 		for row in range(1, dropRows+1): # range does not include last value, so +1
 
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
 			time.sleep(1)
-			print('Dropping seeds.') # drop seeds
-			dropSeeds(3)
-
+			drop_seeds()
+			time.sleep(1)
 			print('-----')
 
 			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first drop in that column, turn left. 
-				print 'Moving Left {}m'.format(dropSpacing)
-				goto_relative_to_current_location(0, -dropSpacing, 0)
+				print('Moving Left {}m'.format(dropSpacing))
+				# goto_relative_to_current_location(0, -dropSpacing, 0)
+				turn_left()
+				move_forward(dropSpacing)
 				print('-----')
 			elif column % 2 == 0 and row == 1: # if column is even & is first drop in that column turn right.
-				print 'Moving Right {}m'.format(dropSpacing)
-				goto_relative_to_current_location(0, +dropSpacing, 0)
-				print('-----')	
+				print('Moving Right {}m'.format(dropSpacing))
+				turn_right()
+				move_forward(dropSpacing)
+				print('-----')
 			else: # otherwsie, move forward.
-				print 'Moving Forward {}m'.format(dropSpacing)
-				goto_relative_to_current_location(dropSpacing, 0, 0)
+				print('Moving Forward {}m'.format(dropSpacing))
+				move_forward(dropSpacing)
 				print('-----')
 			
 		if column == dropColumns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
+			vehicle.parameters['ALT_HOLD_RTL'] = -1 # Keep altitude the same when returning home
 			vehicle.mode = VehicleMode("RTL")
 			while vehicle.mode != "RTL": # waiting for the mode to change, the command is not instant.
 				print("PREPARING DRONE TO RETURN HOME...")
@@ -143,27 +167,26 @@ def seed_planting_mission(rows, columns):
 			print("Vehicle is returning home.")
 		else:
 			if column % 2 != 0: # if column is odd, move right to get to new column.
-				print 'Moving to new column.'
-				goto_relative_to_current_location(0, +dropSpacing, 0)
+				print('Moving to new column.')
+				turn_right()
+				move_forward(dropSpacing)
 			elif column % 2 == 0: # if column is even, move left to get to new column.
-				print 'Moving to new column.'
-				goto_relative_to_current_location(0,-dropSpacing, 0)
+				print('Moving to new column.')
+				turn_left()
+				move_forward(dropSpacing)
 			else:
-				print 'Problem Moving Column'
+				print('Problem Moving Column')
 				
 
 ###### Main Excecutable ######
-time.sleep(5)
-# these will require limits
-confirmation = 'no'
-while confirmation != 'yes':
-	dropHeight = input('What height would you like the seeds to be dropped from? (metres): ')
-	dropSpacing = input('How far away do you want the drop locations to be from one another? (metres): ')
-	dropColumns = input('How many columns of seeds?: ')
-	dropRows = input('How many rows of seeds?: ')
-	dropAreaLength = dropSpacing * (dropRows - 1)
-	dropAreaWidth = dropSpacing * (dropColumns - 1)
-	confirmation = raw_input('This gives you a total drop area length of %dm and a drop area width of %dm. If this is okay type "yes": ' % (dropAreaLength, dropAreaWidth) )
+
+dropHeight = input('What height would you like the seeds to be dropped from? (metres): ')
+dropSpacing = input('How far away do you want the drop locations to be from one another? (metres): ')
+dropColumns = input('How many columns of seeds?: ')
+dropRows = input('How many rows of seeds?: ')
+	# dropAreaLength = dropSpacing * (dropRows - 1)
+	# dropAreaWidth = dropSpacing * (dropColumns - 1)
+	# confirmation = raw_input('This gives you a total drop area length of {}m and a drop area width of {}m. If this is okay type "yes": '.format(dropAreaLength, dropAreaWidth))
 
 vehicle = connectMyCopter()
 
@@ -171,5 +194,5 @@ arm_and_takeoff(dropHeight)
 
 seed_planting_mission(dropRows, dropColumns)
 
-time.sleep(60)
+time.sleep(60) # Change to while vehicle is not disarmed
 

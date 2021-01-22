@@ -1,10 +1,12 @@
-import math
+import re
+from math import sqrt
 
-x = [3, 4, 5]
+location = 'LocationLocal:north=-4.83638954163,east=10.803645134,down=-3.01426243782'
 
-def velocity_magnitude():
-	velocity_vector = x
-	y = math.sqrt(velocity_vector[0]**2 + velocity_vector[1]**2 + velocity_vector[2]**2)
-	return y
+north_position = float(re.search('(?<=north=)-?[0-9]+.[0-9]+', location).group(0))
+east_position = float(re.search('(?<=east=)-?[0-9]+.[0-9]+', location).group(0))
 
-print '{}'.format(velocity_magnitude())
+def distance_moved(initial, current):
+	sqrt((current-initial)**2 + (current-initial)**2)
+
+print(distance_moved)
