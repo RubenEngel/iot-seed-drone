@@ -1,12 +1,9 @@
-import re
-from math import sqrt
+import subprocess
 
-location = 'LocationLocal:north=-4.83638954163,east=10.803645134,down=-3.01426243782'
+drop_height = 2.5
+drop_spacing = 3.5
+drop_columns = 3
+drop_rows = 3
 
-north_position = float(re.search('(?<=north=)-?[0-9]+.[0-9]+', location).group(0))
-east_position = float(re.search('(?<=east=)-?[0-9]+.[0-9]+', location).group(0))
-
-def distance_moved(initial, current):
-	sqrt((current-initial)**2 + (current-initial)**2)
-
-print(distance_moved)
+subprocess.run(['/usr/bin/python', '/home/dronedojo/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
+        '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows)])

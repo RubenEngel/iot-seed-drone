@@ -11,11 +11,22 @@ import serial
 
 ##### Functions ######
 
+parser = argparse.ArgumentParser(description='Drone commands')
+
+parser.add_argument('--connect')
+parser.add_argument('--height')
+parser.add_argument('--spacing')
+parser.add_argument('--rows')
+parser.add_argument('--columns')
+
+args = parser.parse_args()
+
+drop_height = float(args.height) # | input('What height would you like the seeds to be dropped from? (metres): ')
+drop_spacing = float(args.spacing) # | input('How far away do you want the drop locations to be from one another? (metres): ')
+drop_columns = int(args.columns) # | input('How many columns of seeds?: ')
+drop_rows = int(args.rows) # | input('How many rows of seeds?: ')
+
 def connectMyCopter():
-	
-	parser = argparse.ArgumentParser(description='commands')
-	parser.add_argument('--connect')
-	args = parser.parse_args()
 
 	connection_string = args.connect
 
@@ -62,7 +73,7 @@ def arm_and_takeoff(targetHeight):
 	while vehicle.armed==False:
 		print("Waiting for vehicle to become armed")
 		time.sleep(1)
-	print("Virtual props are spinning!")
+	print("Props are spinning!")
 
 	vehicle.simple_takeoff(targetHeight) ## in metres
 
@@ -72,6 +83,7 @@ def arm_and_takeoff(targetHeight):
 			break
 		time.sleep(1)
 	print("Target altitude reached")
+	print('----')
 	return None
 
 def north_position(location): 
@@ -100,15 +112,17 @@ def goto_relative_to_current_location(north, east, down):
 	# initial_north = north_position(initial_location) # Use north position function to get number format of relative north pos
 	# initial_east = east_position(initial_location) # Use east position function to get number format of relative east pos
 	distance_moved = 0 # initialise distance moved
-	while distance_moved < dropSpacing*0.96: # While distance moved is not close to user specified drop spacing
+	print('-----')
+	while distance_moved < drop_spacing*0.96: # While distance moved is not close to user specified drop spacing
 		# Calculate distance moved every 0.5 seconds
 		distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
-		print(distance_moved)
+		print('Distance to destination: {}'.format(drop_spacing - distance_moved))
 		time.sleep(0.5)
-	print('destination reached')
+	print('Destination reached')
+	print('-----')
 
-def move_forward(dropSpacing):
-	goto_relative_to_current_location(dropSpacing, 0, 0)
+def move_forward(drop_spacing):
+	goto_relative_to_current_location(drop_spacing, 0, 0)
 
 def set_yaw(heading, clockwise, relative=True):
 	if relative:
@@ -137,68 +151,57 @@ def turn_left():
 	set_yaw(90, -1)
 
 def seed_planting_mission(rows, columns):
-	for column in range(1, dropColumns+1): # range does not include last value, so +1
+	for column in range(1, drop_columns+1): 
 
-		drop_seeds()
-
-		for row in range(1, dropRows+1): # range does not include last value, so +1
-
+		for row in range(1, drop_rows):
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
-			time.sleep(1)
 			drop_seeds()
-			time.sleep(1)
-			print('-----')
 
 			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first drop in that column, turn left. 
-				print('Moving Left {}m'.format(dropSpacing))
+				print('Moving Left {}m'.format(drop_spacing))
 				turn_left()
-				move_forward(dropSpacing)
-				print('-----')
+				move_forward(drop_spacing)
 			elif column % 2 == 0 and row == 1: # if column is even & is first drop in that column turn right.
-				print('Moving Right {}m'.format(dropSpacing))
+				print('Moving Right {}m'.format(drop_spacing))
 				turn_right()
-				move_forward(dropSpacing)
-				print('-----')
-			else: # otherwsie, move forward.
-				print('Moving Forward {}m'.format(dropSpacing))
-				move_forward(dropSpacing)
-				print('-----')
+				move_forward(drop_spacing)
+			else: # otherwise, move forward.
+				print('Moving Forward {}m'.format(drop_spacing))
+				move_forward(drop_spacing)
 			
-		if column == dropColumns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
+		if column == drop_columns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
+			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+			drop_seeds()
 			vehicle.parameters['RTL_ALT'] = 0 # Keep altitude the same when returning home
-			vehicle.mode = VehicleMode("RTL")
-			while vehicle.mode != "RTL": # waiting for the mode to change, the command is not instant.
+			vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
+			while vehicle.mode != "RTL": # wait for the mode to change.
 				print("PREPARING DRONE TO RETURN HOME...")
 				time.sleep(1)
 			print("Vehicle is returning home.")
 		else:
 			if column % 2 != 0: # if column is odd, move right to get to new column.
+				print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+				drop_seeds()
 				print('Moving to new column.')
 				turn_right()
-				move_forward(dropSpacing)
+				move_forward(drop_spacing)
 			elif column % 2 == 0: # if column is even, move left to get to new column.
+				print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+				drop_seeds()
 				print('Moving to new column.')
 				turn_left()
-				move_forward(dropSpacing)
+				move_forward(drop_spacing)
 			else:
 				print('Problem Moving Column')
 				
 
 ###### Main Excecutable ######
 
-dropHeight = input('What height would you like the seeds to be dropped from? (metres): ')
-dropSpacing = input('How far away do you want the drop locations to be from one another? (metres): ')
-dropColumns = input('How many columns of seeds?: ')
-dropRows = input('How many rows of seeds?: ')
-	# dropAreaLength = dropSpacing * (dropRows - 1)
-	# dropAreaWidth = dropSpacing * (dropColumns - 1)
-	# confirmation = raw_input('This gives you a total drop area length of {}m and a drop area width of {}m. If this is okay type "yes": '.format(dropAreaLength, dropAreaWidth))
-
 vehicle = connectMyCopter()
 
-arm_and_takeoff(dropHeight)
+arm_and_takeoff(drop_height)
 
-seed_planting_mission(dropRows, dropColumns)
+seed_planting_mission(drop_rows, drop_columns)
 
 while vehicle.armed == True:
 	time.sleep(1)
