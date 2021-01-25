@@ -21,10 +21,10 @@ parser.add_argument('--columns')
 
 args = parser.parse_args()
 
-drop_height = float(args.height) # | input('What height would you like the seeds to be dropped from? (metres): ')
-drop_spacing = float(args.spacing) # | input('How far away do you want the drop locations to be from one another? (metres): ')
-drop_columns = int(args.columns) # | input('How many columns of seeds?: ')
-drop_rows = int(args.rows) # | input('How many rows of seeds?: ')
+drop_height = float(args.height)
+drop_spacing = float(args.spacing)
+drop_columns = int(args.columns)
+drop_rows = int(args.rows)
 
 def connectMyCopter():
 
