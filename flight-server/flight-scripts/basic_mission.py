@@ -165,7 +165,7 @@ def seed_planting_mission(rows, columns):
 				print('-----')
 			
 		if column == dropColumns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
-			vehicle.parameters['ALT_HOLD_RTL'] = -1 # Keep altitude the same when returning home
+			vehicle.parameters['RTL_ALT'] = 0 # Keep altitude the same when returning home
 			vehicle.mode = VehicleMode("RTL")
 			while vehicle.mode != "RTL": # waiting for the mode to change, the command is not instant.
 				print("PREPARING DRONE TO RETURN HOME...")
