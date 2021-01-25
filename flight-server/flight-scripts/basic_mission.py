@@ -4,6 +4,7 @@ import time
 import socket
 import exceptions
 import math
+import re
 import argparse
 from pymavlink import mavutil
 import serial
@@ -67,37 +68,43 @@ def arm_and_takeoff(targetHeight):
 
 	while True:
 		print("Current Altitude: %d" % vehicle.location.global_relative_frame.alt)
-		if vehicle.location.global_relative_frame.alt >= .95*targetHeight:
+		if vehicle.location.global_relative_frame.alt >= .96*targetHeight:
 			break
 		time.sleep(1)
 	print("Target altitude reached")
 	return None
 
-def goto_relative_to_current_location(north, east, down):
-	"""	
-	Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified 
-	location in the North, East, Down frame.
-	It is important to remember that in this frame, positive altitudes are entered as negative 
-	"Down" values. So if down is "10", this will be 10 metres below the home altitude.
-	"""
+def north_position(location): 
+	return float(re.search('(?<=north=)-?[0-9]+.[0-9]+', location).group(0))
+
+def east_position(location):
+	return float(re.search('(?<=east=)-?[0-9]+.[0-9]+', location).group(0))
+
+def distance_magnitude(initial_n, initial_e, current_n, current_e):
+	return math.sqrt((current_n-initial_n)**2 + (current_e-initial_e)**2)
+
+def goto_relative_to_current_location(north, east, down):	
+	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified location in the North, East, Down frame.
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
 		0,       # time_boot_ms (not used)
 		0, 0,    # target system, target component
-		mavutil.mavlink.MAV_FRAME_BODY_NED, # frame
+		mavutil.mavlink.MAV_FRAME_BODY_NED, # frame - body frame relative to current vehicle location
 		0b0000111111111000, # type_mask (only positions enabled)
-		north, east, down, # x, y, z positions (or North, East, Down in the MAV_FRAME_BODY_NED frame
+		north, east, down, # North, East, Down in the MAV_FRAME_BODY_NED frame
 		0, 0, 0, # x, y, z velocity in m/s  (not used)
 		0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
-	while vehicle.airspeed < 0.1:
-		time.sleep(1)
-	while vehicle.airspeed > 0.1:
-		print("{}".format(vehicle.airspeed))
-		print('{}'.format(vehicle.location.local_frame))
-		print('-----')
-		time.sleep(1)
+	initial_location = str(vehicle.location.local_frame) # Get initial location in string format
+	# initial_north = north_position(initial_location) # Use north position function to get number format of relative north pos
+	# initial_east = east_position(initial_location) # Use east position function to get number format of relative east pos
+	distance_moved = 0 # initialise distance moved
+	while distance_moved < dropSpacing*0.96: # While distance moved is not close to user specified drop spacing
+		# Calculate distance moved every 0.5 seconds
+		distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
+		print(distance_moved)
+		time.sleep(0.5)
 	print('destination reached')
 
 def move_forward(dropSpacing):
@@ -144,7 +151,6 @@ def seed_planting_mission(rows, columns):
 
 			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first drop in that column, turn left. 
 				print('Moving Left {}m'.format(dropSpacing))
-				# goto_relative_to_current_location(0, -dropSpacing, 0)
 				turn_left()
 				move_forward(dropSpacing)
 				print('-----')
@@ -194,5 +200,5 @@ arm_and_takeoff(dropHeight)
 
 seed_planting_mission(dropRows, dropColumns)
 
-time.sleep(60) # Change to while vehicle is not disarmed
-
+while vehicle.armed == True:
+	time.sleep(1)
