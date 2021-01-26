@@ -130,7 +130,6 @@ def set_yaw(heading, clockwise, relative=True):
 	else:
 		is_relative=0 #yaw is an absolute angle
 	# create the CONDITION_YAW command using command_long_encode()
-	initial_heading = vehicle.heading
 	msg = vehicle.message_factory.command_long_encode(
 		0, 0,    # target system, target component
 		mavutil.mavlink.MAV_CMD_CONDITION_YAW, #command
