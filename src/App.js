@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import Input from './components/Input';
+import Route from './images/mission_route.png'
 
 const socket = io(); // Don't put inside App component
 
@@ -60,7 +61,7 @@ function App() {
 
 
   return (
-    <div className="App">
+    <div>
 
         <div className='p-3'>
           <h1>SeedGenCopter</h1>
@@ -68,27 +69,45 @@ function App() {
         </div>
 
         {!flightStarted && 
-        <>
-        <h3>Mission Parameters</h3>
-        <form className='input-form'>
-          <Input name='Height' onChange={e => setDropHeight(e.target.value)} value={dropHeight}/>
-          <Input name='Columns' onChange={e => setDropColumns(e.target.value)} value={dropColumns}/>
-          <Input name='Rows' onChange={e => setDropRows(e.target.value)} value={dropRows}/>
-          <Input name='Spacing' onChange={e => setDropSpacing(e.target.value)} value={dropSpacing}/>
-        </form>
-        <div>
-          <button onClick={submitParams}>Start Flight</button>
+        <div className=''>
+          
+          <div className='m-auto container'>
+            <img src={Route} alt='Example mission route'/>
+          </div>
+
+          <div className='mt-6'>
+            <h2 className='text-3xl'>Mission Parameters</h2>
+          </div>
+          
+          <div>
+            <form className='my-3 flex flex-col place-items-center text-2xl'>
+              <Input name='Height' onChange={e => setDropHeight(e.target.value)} value={dropHeight}/>
+              <Input name='Columns' onChange={e => setDropColumns(e.target.value)} value={dropColumns}/>
+              <Input name='Rows' onChange={e => setDropRows(e.target.value)} value={dropRows}/>
+              <Input name='Spacing' onChange={e => setDropSpacing(e.target.value)} value={dropSpacing}/>
+            </form>
+          </div>
+
+          <div>
+            <button 
+              className='py-2 px-4 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
+              onClick={submitParams}>
+                Start Flight
+            </button>
+          </div>
+
         </div>
-        </>
         }
 
         {flightStarted && 
+          
           <div>
             <h3>Mission Log</h3>
             <div className='mission-log'>
               <ul>{missionLogList}</ul>
             </div>
           </div>
+
           }
 
     </div>

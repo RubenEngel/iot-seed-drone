@@ -6,22 +6,11 @@ body {
   text-align: center;
   background-color: rgb(255, 255, 255);
   font-size: 1.5rem;
-  background-color: blueviolet;
 }
 
-h3 {
-    margin-top: 20px;
-  }
-  
-.input-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 1.8rem;
-    margin: 40px 0;
-  }
-  
-
+h1{
+  font-size: 2.5rem;
+}
   
 .mission-log{
     background-color: lightgray;
@@ -29,7 +18,3 @@ h3 {
     padding: 40px;
     color:black;
   }
-
-button{
-  @apply hover:bg-white
-}
