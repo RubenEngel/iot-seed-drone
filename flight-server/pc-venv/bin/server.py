@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 import datetime
 import time
 import subprocess
+import io
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -41,10 +42,17 @@ def on_connect():
 
 @socket.on('flight-start')
 def on_flight_start():
-    emit('message', 'Flight parameters sent. Starting flight..')
-    subprocess.Popen(['/usr/bin/python', '/home/dronedojo/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
-    '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ])
-    emit('message', 'Flight started.')
+    emit('message', 'Flight parameters sent successfully.')
+    process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/dronedojo/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
+    '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while process.poll() is None:
+        for line in iter(process.stdout.readline, b''):
+            print(line.rstrip().decode('utf-8'))
+            emit('message', line.rstrip().decode('utf-8'))
+    emit('message', 'Mission complete.')
+    time.sleep(1)
+    emit('status', 'complete')
+    
 
 if __name__ == '__main__':
     socket.run(app)
