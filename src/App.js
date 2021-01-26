@@ -64,14 +64,14 @@ function App() {
     <div>
 
         <div className='p-3'>
-          <h1>SeedGenCopter</h1>
+          <h1 className='text-blue-500'>SeedGenCopter</h1>
           <h3>Server Connected: {currentTime ? currentTime : 'Failed'}</h3>
         </div>
 
         {!flightStarted && 
-        <div className=''>
+        <div>
           
-          <div className='m-auto container'>
+          <div className='m-auto container max-w-xl'>
             <img src={Route} alt='Example mission route'/>
           </div>
 
@@ -88,7 +88,7 @@ function App() {
             </form>
           </div>
 
-          <div>
+          <div className='mt-6'>
             <button 
               className='py-2 px-4 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
               onClick={submitParams}>
