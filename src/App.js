@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import Input from './components/Input';
 import Route from './images/mission_route.png'
+import ScrollToBottom from 'react-scroll-to-bottom'
 
 const socket = io(); // Don't put inside App component
 
@@ -39,7 +40,7 @@ function App() {
         // Mission Log
       const [missionLog, setMissionLog] = useState([])
       const missionLogList = missionLog.map((log, index) => 
-        <li className='mb-6' key={index}>{log}</li>
+        <p className='mb-6' key={index}>{log}</p>
       )
 
       useEffect(() => {
@@ -90,7 +91,7 @@ function App() {
 
           <div className='mt-6'>
             <button 
-              className='py-2 px-4 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
+              className='py-2 px-4 mb-8 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
               onClick={submitParams}>
                 Start Flight
             </button>
@@ -100,14 +101,12 @@ function App() {
         }
 
         {flightStarted && 
-          
-          <div>
-            <h3>Mission Log</h3>
-            <div className='mission-log'>
-              <ul>{missionLogList}</ul>
-            </div>
-          </div>
-
+          <>
+          <h3>Mission Log</h3>
+          <ScrollToBottom className='mission-log overflow-y-scroll bg-gray-100 mx-8'>  
+              {missionLogList}
+          </ScrollToBottom>
+          </>
           }
 
     </div>

@@ -30,10 +30,10 @@ def connectMyCopter():
 
 	connection_string = args.connect
 
-	if not connection_string:
-		import dronekit_sitl
-		sitl = dronekit_sitl.start_default()
-		connection_string = sitl.connection_string()
+	# if not connection_string:
+	# 	import dronekit_sitl
+	# 	sitl = dronekit_sitl.start_default()
+	# 	connection_string = sitl.connection_string()
 
 	vehicle = connect(connection_string, wait_ready = True)
 
@@ -149,6 +149,13 @@ def turn_right():
 def turn_left():
 	set_yaw(90, -1)
 
+def return_home():
+	vehicle.parameters['RTL_ALT'] = 0 # Stay at current altitude when returning home
+	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
+	while vehicle.mode != "RTL": # wait for the mode to change.
+		time.sleep(1)
+		print("Drone is returning home.")
+
 def seed_planting_mission(rows, columns):
 	for column in range(1, drop_columns+1): 
 
@@ -169,14 +176,9 @@ def seed_planting_mission(rows, columns):
 				move_forward(drop_spacing)
 			
 		if column == drop_columns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
-			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+			print('Last drop') # print what column and row currently at
 			drop_seeds()
-			vehicle.parameters['RTL_ALT'] = 0 # Keep altitude the same when returning home
-			vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
-			while vehicle.mode != "RTL": # wait for the mode to change.
-				print("PREPARING DRONE TO RETURN HOME...")
-				time.sleep(1)
-			print("Vehicle is returning home.")
+			return_home()
 		else:
 			if column % 2 != 0: # if column is odd, move right to get to new column.
 				print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
@@ -196,11 +198,17 @@ def seed_planting_mission(rows, columns):
 
 ###### Main Excecutable ######
 
+# Connect to drone on specified port
 vehicle = connectMyCopter()
 
+# Take off to specified drop height
 arm_and_takeoff(drop_height)
 
+# Start seed planting mission
 seed_planting_mission(drop_rows, drop_columns)
 
+
+
+# While vehicle is still armed, wait 1 second loop
 while vehicle.armed == True:
 	time.sleep(1)
