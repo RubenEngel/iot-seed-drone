@@ -46,7 +46,6 @@ def on_flight_start():
     '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while process.poll() is None: # while process is running
         for line in iter(process.stdout.readline, b''):
-            print(line.rstrip().decode('utf-8'))
             emit('message', line.rstrip().decode('utf-8'))
     emit('message', 'Mission complete.')
     time.sleep(1)

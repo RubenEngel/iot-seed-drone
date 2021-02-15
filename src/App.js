@@ -40,7 +40,7 @@ function App() {
         // Mission Log
       const [missionLog, setMissionLog] = useState([])
       const missionLogList = missionLog.map((log, index) => 
-        <li className='mb-6' key={index}>{log}</li>
+        <p className='mb-6' key={index}>{log}</p>
       )
 
       useEffect(() => {
@@ -91,7 +91,7 @@ function App() {
 
           <div className='mt-6'>
             <button 
-              className='py-2 px-4 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
+              className='py-2 px-4 mb-8 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
               onClick={submitParams}>
                 Start Flight
             </button>

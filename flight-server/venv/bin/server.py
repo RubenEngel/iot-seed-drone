@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 import datetime
 import time
 import subprocess
+import io
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -16,49 +17,39 @@ def get_current_time():
 
 ###### GET FLIGHT PARAMETER FROM FRONT END SUBMISSION
 
-dropHeight = 0
-dropColumns = 0
-dropRows = 0
-dropSpacing = 0
+drop_height = 0
+drop_columns = 0
+drop_rows = 0
+drop_spacing = 0
 
 @app.route('/api/params', methods = ['POST'])
 def get_flight_params():
     flight_params = request.get_json()
     print(flight_params)
-    global dropHeight
-    global dropColumns
-    global dropRows
-    global dropSpacing
-    dropHeight = flight_params['dropHeight']
-    dropColumns = flight_params['dropColumns']
-    dropRows = flight_params['dropRows']
-    dropSpacing = flight_params['dropSpacing']
+    global drop_height
+    global drop_columns
+    global drop_rows
+    global drop_spacing
+    drop_height = flight_params['dropHeight']
+    drop_columns = flight_params['dropColumns']
+    drop_rows = flight_params['dropRows']
+    drop_spacing = flight_params['dropSpacing']
     return 'Done', 201
 
 @socket.on('connect')
 def on_connect():
     print('user connected')
 
-def dropSeeds(time):
-    time.sleep(1)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/open.py'])
-    emit('message', 'Dropping seeds..')
-    time.sleep(time)
-    subprocess.call(['/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/close.py'])
-    time.sleep(1)
-
 @socket.on('flight-start')
 def on_flight_start():
-    emit('message', 'Flying to altitude: {}m..'.format(dropHeight))
-    time.sleep(int(dropHeight))
-    emit('message', 'Altitude reached.')
-    dropSeeds(3)
-    emit('message', 'Flying to next way point {}m away..'.format(dropSpacing))
-    time.sleep(int(dropSpacing))
-    emit('message', 'Destination reached.')
-    dropSeeds(3)
+    emit('message', 'Flight parameters sent successfully.')
+    process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
+    '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while process.poll() is None:
+        for line in iter(process.stdout.readline, b''):
+            emit('message', line.rstrip().decode('utf-8'))
     emit('message', 'Mission complete.')
-    time.sleep(3)
+    time.sleep(1)
     emit('status', 'complete')
     
 
