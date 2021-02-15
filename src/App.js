@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import Input from './components/Input';
 import Route from './images/mission_route.png'
+import ScrollToBottom from 'react-scroll-to-bottom'
 
 const socket = io(); // Don't put inside App component
 
@@ -103,9 +104,9 @@ function App() {
           
           <div>
             <h3>Mission Log</h3>
-            <div className='mission-log'>
+            <ScrollToBottom className='mission-log'>
               <ul>{missionLogList}</ul>
-            </div>
+            </ScrollToBottom>
           </div>
 
           }

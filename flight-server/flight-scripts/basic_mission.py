@@ -192,15 +192,10 @@ def seed_planting_mission(rows, columns):
 				move_forward(drop_spacing)
 			else:
 				print('Problem Moving Column')
-				
 
 ###### Main Excecutable ######
-
 vehicle = connectMyCopter()
-
 arm_and_takeoff(drop_height)
-
 seed_planting_mission(drop_rows, drop_columns)
-
 while vehicle.armed == True:
 	time.sleep(1)
