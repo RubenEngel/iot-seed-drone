@@ -81,7 +81,7 @@ def arm_and_takeoff(targetHeight):
 		print("Current Altitude: %.2f" % vehicle.location.global_relative_frame.alt)
 		if vehicle.location.global_relative_frame.alt >= .96*targetHeight:
 			break
-		time.sleep(0.25)
+		time.sleep(0.75)
 	print("Target altitude reached")
 	print('----')
 	return None
@@ -176,18 +176,18 @@ def seed_planting_mission(rows, columns):
 				move_forward(drop_spacing)
 			
 		if column == drop_columns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
-			print('Last drop') # print what column and row currently at
+			print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
 			drop_seeds()
 			return_home()
 		else:
 			if column % 2 != 0: # if column is odd, move right to get to new column.
-				print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
 				drop_seeds()
 				print('Moving to new column.')
 				turn_right()
 				move_forward(drop_spacing)
 			elif column % 2 == 0: # if column is even, move left to get to new column.
-				print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
 				drop_seeds()
 				print('Moving to new column.')
 				turn_left()
