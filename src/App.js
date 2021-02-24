@@ -47,14 +47,13 @@ function App() {
 
       // Flight Stats
       const [flightStats, setFlightStats] = useState({
-        'altitude': 0,
-        'airspeed': 0,
-        'battery': '?',
-        'obstacle': '?'
+        'altitude': null,
+        'airspeed': null,
+        'battery': null,
+        'obstacle': null
       })
-
-      const [col, setCol] = useState(0)
-      const [row, setRow] = useState(0)
+      const [col, setCol] = useState(null)
+      const [row, setRow] = useState(null)
 
       // Mission Log
       const [missionLog, setMissionLog] = useState([])
@@ -99,25 +98,25 @@ function App() {
 
 
   return (
-    <div>
+    <>
 
         <div className='p-3'>
-          <h1 className='text-blue-500'>SeedGenCopter</h1>
-          <h3>Server Connected: {currentTime ? currentTime : 'Failed'}</h3>
+          {/* Page title */}
+          <h1 className='text-4xl text-blue-500'>SeedGenCopter</h1>
+          {/* Checks server connection by getting current time from server */}
+          <h3 className=' text-base'>Server Status: {currentTime ? currentTime : 'Failed'}</h3>
         </div>
 
-        {!flightStarted && 
-        <div>
-          
-          <div className='m-auto container max-w-xl'>
+        {!flightStarted && // If the flight has not started render mission parameters page
+        <>
+        <div className='md:grid md:grid-cols-2 items-center max-w-5xl mx-auto'>
+          {/* Image showing example mission route */}
+          <div className='m-auto container max-w-lg'>
             <img src={Route} alt='Example mission route'/>
           </div>
-
-          <div className='mt-6'>
-            <h2 className='text-3xl'>Mission Parameters</h2>
-          </div>
-          
+          {/* Input boxes for flight parameters */}
           <div>
+            <h2 className='text-3xl lg:text-4xl text-blue-500'>Mission Parameters</h2>
             <form className='my-3 flex flex-col place-items-center text-2xl'>
               <Input name='Height' onChange={e => setDropHeight(e.target.value)} value={dropHeight}/>
               <Input name='Columns' onChange={e => setDropColumns(e.target.value)} value={dropColumns}/>
@@ -126,18 +125,20 @@ function App() {
             </form>
           </div>
 
-          <div className='mt-6'>
+        </div>
+
+        <div className='mt-6'>
             <button 
-              className='py-2 px-4 mb-8 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
+              className='text-xl md:text-2xl py-2 px-4 mb-8 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
               onClick={submitParams}>
                 Start Flight
             </button>
           </div>
 
-        </div>
+        </>
         }
 
-        {flightStarted && 
+        { !flightStarted && 
           <>
           {page === 'log' && <MissionLog missionLogList={missionLogList}/>}
           {page === 'stats' && <MissionStats flightStats={flightStats} col={col} row={row}/>}
@@ -153,7 +154,7 @@ function App() {
           </>
           }
 
-    </div>
+    </>
   );
 }
 
