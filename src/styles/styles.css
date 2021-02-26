@@ -12,6 +12,10 @@ h1{
   font-size: 2.5rem;
 }
   
+h2{
+  @apply text-blue-500 text-3xl font-bold;
+}
+
 .mission-log{
     border-radius: 25px;
     border-width: 3px;

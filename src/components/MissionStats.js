@@ -8,7 +8,7 @@ export default function MissionStats({flightStats, row, col}) {
     
     return(
     <>
-        <h3>Flight Stats</h3>
+        <h2>Flight Stats</h2>
         <div className='grid grid-cols-2 grid-rows-6 mission-log'>
 
             <div className='self-center flex flex-row justify-center items-center'>

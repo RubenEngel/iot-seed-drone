@@ -38,29 +38,75 @@ def get_flight_params(): # complete the following function
     drop_spacing = flight_params['dropSpacing'] # set drop spacing to the number received from front end
     return 'Done', 201 # send status code back to front end
 
-@socket.on('connect') # when user connect to socket
+@socket.on('connect') # when user connects to socket
 def on_connect():
     print('user connected')
 
-@socket.on('disconnect')
+@socket.on('disconnect') # when user disconnects from socket
 def on_disconnect():
     print('Client disconnected')
 
-@socket.on('flight-start') # when flight start command received from socket
-def on_flight_start():
-    emit('message', 'Flight parameters sent successfully.')
+mission_process = None
+stats_process = None
+
+def start_mission():
     mission_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
     '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return mission_process
+
+def start_stats():
+    stats_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/flight_stats.py', '--connect', '127.0.0.1:14551'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return stats_process
+
+def land_mode():
+    land_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/land.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return land_process
+
+def return_to_launch():
+    home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return home_process
+
+@socket.on('flight-start') # when flight start command received from frontend socket
+def on_flight_start():
+    emit('message', 'Flight parameters sent successfully.')
+    global mission_process
+    mission_process = start_mission()
     while mission_process.poll() is None: # while process is running
         for line in iter(mission_process.stdout.readline, b''):
             emit('message', line.rstrip().decode('utf-8'))
     emit('message', 'Mission complete.')
     time.sleep(1)
     emit('status', 'complete')
-    
+
+@socket.on('flight-land')
+def on_land():
+    print('LAND')
+    mission_process.terminate()
+    mission_process.wait()
+    land_process = land_mode()
+    while land_process.poll() is None: # while process is running
+        for line in iter(land_process.stdout.readline, b''):
+            emit('message', line.rstrip().decode('utf-8'))
+
+@socket.on('flight-home')
+def on_home():
+    print('RETURN TO LAUNCH')
+    mission_process.terminate()
+    mission_process.wait()
+    home_process = return_to_launch()
+    while home_process.poll() is None: # while process is running
+        for line in iter(home_process.stdout.readline, b''):
+            emit('message', line.rstrip().decode('utf-8')) # send outputs to mission log
+
+@socket.on('flight-stop')
+def on_flight_stop():
+    print('FLIGHT STOP')
+    mission_process.terminate()
+    mission_process.wait()
+
 @socket.on('flight-stats')
 def get_flight_stats():
-    stats_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/flight_stats.py', '--connect', '127.0.0.1:14551'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stats_process = start_stats()
     while stats_process.poll() is None: # while process is running
         for line in iter(stats_process.stdout.readline, b''):
             emit('stats', line.rstrip().decode('utf-8'))
