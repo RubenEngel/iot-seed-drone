@@ -1,6 +1,6 @@
 # A Python and Linux based autonomous drone with a control web application developed using React and Flask
 
-The drone can go on a seed planting mission using arguments submitted to the mission flight script - column, row, height, spacing. It will be able to avoid obstacles (simulated with gazebo and ROS) and verify that the drop location is suitable using image colour comparison. 
+The drone can go on a seed planting mission using arguments submitted to the mission flight script - column, row, height, spacing. It sends a drop signal to an arduino based system with a Raspberry Pi USB connection and pyserial. It will be able to avoid obstacles (simulated with gazebo and ROS) and verify that the drop location is suitable using image colour comparison. 
 
 The control web application is served with nginx on the drone's Raspberry Pi. Serves React frontend app and Flask backend. A RTMP live video server is to be implemented.
 
