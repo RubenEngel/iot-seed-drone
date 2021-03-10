@@ -50,20 +50,20 @@ mission_process = None
 stats_process = None
 
 def start_mission():
-    mission_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
+    mission_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
     '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return mission_process
 
 def start_stats():
-    stats_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/flight_stats.py', '--connect', '127.0.0.1:14551'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stats_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/flight_stats.py', '--connect', '127.0.0.1:14551'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return stats_process
 
 def land_mode():
-    land_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/land.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    land_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/land.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return land_process
 
 def return_to_launch():
-    home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return home_process
 
 @socket.on('flight-start') # when flight start command received from frontend socket
