@@ -7,7 +7,7 @@ from colorthief import ColorThief
 
 # camera.capture('/current_location.jpg')
 
-color_thief = ColorThief('/current_location.jpg')
+color_thief = ColorThief('current_location.jpg')
 
 # get the dominant color
 '''
