@@ -1,11 +1,11 @@
 from colorthief import ColorThief
-from picamera import PiCamera
+# from picamera import PiCamera
 
-camera = PiCamera()
+# camera = PiCamera()
 
-camera.resolution = (500, 500)
+# camera.resolution = (500, 500)
 
-camera.capture('/current_location.jpg')
+# camera.capture('/current_location.jpg')
 
 color_thief = ColorThief('/current_location.jpg')
 
