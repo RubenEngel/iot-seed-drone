@@ -1,6 +1,6 @@
 from colorthief import ColorThief
 
-color_thief = ColorThief('current_location.jpg')
+color_thief = ColorThief('test.jpg')
 
 # get the dominant color
 '''
