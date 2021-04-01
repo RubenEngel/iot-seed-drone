@@ -8,6 +8,9 @@ import re
 import argparse
 from pymavlink import mavutil
 import serial
+import rospy
+from sensor_msgs.msg import LaserScan
+import numpy as np
 
 ##### Functions ######
 
@@ -21,14 +24,13 @@ parser.add_argument('--columns')
 
 args = parser.parse_args()
 
-drop_height = float(args.height)
-drop_spacing = float(args.spacing)
-drop_columns = int(args.columns)
-drop_rows = int(args.rows)
+connection_string = '127.0.0.1:14550' #args.connect
+drop_height = 2 #float(args.height)
+drop_spacing = 3 #float(args.spacing)
+drop_columns = 3 #int(args.columns)
+drop_rows = 3 #int(args.rows)
 
 def connectMyCopter():
-
-	connection_string = args.connect
 
 	vehicle = connect(connection_string, wait_ready = True)
 
@@ -138,11 +140,11 @@ def set_yaw(heading, clockwise, relative=True):
 	vehicle.send_mavlink(msg)
 	time.sleep(3)
 
-def turn_right():
-	set_yaw(90, 1)
+def turn_right(degrees):
+	set_yaw(degrees, 1)
 
-def turn_left():
-	set_yaw(90, -1)
+def turn_left(degrees):
+	set_yaw(degrees, -1)
 
 def return_home():
 	vehicle.parameters['RTL_ALT'] = 0 # Stay at current altitude when returning home
@@ -150,6 +152,41 @@ def return_home():
 	while vehicle.mode != "RTL": # wait for the mode to change.
 		time.sleep(1)
 		print("Drone is returning home.")
+
+obstacle = False
+obstacle_position = None
+
+def check_obstacle():
+    global obstacle
+    global obstacle_position
+    if min_distance < drop_spacing * 1.5:
+        obstacle = True
+        if min_index > len(ranges)/2:
+            obstacle_position = 'left'
+        else:
+            obstacle_position = 'right'
+    else:
+        obstacle = False
+
+def avoid_obstacle():
+    if obstacle is True and obstacle_position is 'left':
+        print('obstacle on the left')
+        turn_angle = math.degrees(math.atan( avoid_distance/min_distance )) # inverse tan of avoid distance over distance to obstacle
+        move_distance = math.sqrt( avoid_distance**2 + min_distance**2 ) # find hypothenuse
+        turn_right(turn_angle)
+        move_forward(move_distance)
+        turn_left(2*turn_angle)
+        move_forward(move_distance)
+        turn_right(turn_angle)
+    if obstacle is True and obstacle_position is 'right':
+        print('obstacle on the right')
+        turn_angle = math.degrees(math.atan( avoid_distance/min_distance )) # inverse tan of avoid distance over distance to obstacle
+        move_distance = math.sqrt( avoid_distance**2 + min_distance**2 )
+        turn_left(turn_angle)
+        move_forward(move_distance)
+        turn_right(2*turn_angle)
+        move_forward(move_distance)
+        turn_left(turn_angle)
 
 def seed_planting_mission(rows, columns):
 	for column in range(1, drop_columns+1): 
@@ -160,11 +197,11 @@ def seed_planting_mission(rows, columns):
 
 			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first drop in that column, turn left. 
 				print('Moving Left {}m'.format(drop_spacing))
-				turn_left()
+				turn_left(90)
 				move_forward(drop_spacing)
 			elif column % 2 == 0 and row == 1: # if column is even & is first drop in that column turn right.
 				print('Moving Right {}m'.format(drop_spacing))
-				turn_right()
+				turn_right(90)
 				move_forward(drop_spacing)
 			else: # otherwise, move forward.
 				print('Moving Forward {}m'.format(drop_spacing))
@@ -179,25 +216,63 @@ def seed_planting_mission(rows, columns):
 				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
 				drop_seeds()
 				print('Moving to new column.')
-				turn_right()
+				turn_right(90)
 				move_forward(drop_spacing)
 			elif column % 2 == 0: # if column is even, move left to get to new column.
 				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
 				drop_seeds()
 				print('Moving to new column.')
-				turn_left()
+				turn_left(90)
 				move_forward(drop_spacing)
 			else:
 				print('Problem Moving Column')
 
+# globals
+ranges = None
+min_distance = None # the minimum distacne read from lidar sensor
+min_index = None # where in the array is the minimum distance found (end of array is the left-most point)
+avoid_distance = 2 # stay 2 meters away from
+
+def scan_callback(scan_msg):
+    """ scan will be of type LaserScan """
+    # Save a global reference to the most recent sensor state so that
+    # it can be accessed in the main control loop.
+    # (The global keyword prevents the creation of a local variable here.)
+    # global scan_data
+    global ranges
+    global min_distance
+    global min_index
+    # if scan_msg is not None:
+    ranges = scan_msg.ranges
+    min_distance = np.amin(ranges)
+    min_index = np.argmin(ranges)
+
+def ros_subscriber():
+    # Turn this into an official ROS node named approach
+    rospy.init_node('obstacle')
+    # Subscribe to the /forward_lidar topic.
+    # scan_callback will be called every time a new scan message is
+    # published.
+    # global scan_callback
+    rospy.Subscriber('/forward_lidar', LaserScan, scan_callback)
+
 ###### Main Excecutable ######
+
+ros_subscriber()
 
 # Connect to drone on specified port
 vehicle = connectMyCopter()
 # Take off to specified drop height
 arm_and_takeoff(drop_height)
+
+check_obstacle()
+
+if obstacle == True:
+    avoid_obstacle()
+
 # Start seed planting mission
-seed_planting_mission(drop_rows, drop_columns)
+# seed_planting_mission(drop_rows, drop_columns)
+
 # While vehicle is still armed, wait 1 second loop
 while vehicle.armed == True:
 	time.sleep(1)
