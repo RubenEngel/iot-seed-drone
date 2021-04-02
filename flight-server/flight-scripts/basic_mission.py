@@ -102,9 +102,9 @@ def goto_relative_to_home_location(north, east):
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
 		0,		# time_boot_ms (not used)
 		0, 0,	# target system, target component
-		mavutil.mavlink.MAV_FRAME_LOCAL_NED,	# frame
+		mavutil.mavlink.MAV_FRAME_LOCAL_NED,	# frame - position is relative to home location (North, East, Down frame)
 		0b0000111111111000,	# type_mask (only positions enabled)
-		north, east, -drop_height, # North, East, Down in the MAV_FRAME_BODY_NED frame
+		north, east, -drop_height, # North, East, Down position
 		0, 0, 0, # x, y, z velocity in m/s  (not used)
 		0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
