@@ -2,6 +2,7 @@ import React from 'react'
 import Button from './Button'
 
 function MissionFunctions({socket}) {
+
     return (
         <>
         <h2>Flight Functions</h2>

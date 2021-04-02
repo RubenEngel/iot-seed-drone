@@ -8,12 +8,12 @@ import MissionLog from './components/MissionLog'
 import MissionStats from './components/MissionStats'
 // import MissionSetup from './components/MissionSetup'
 import MissionFunctions from './components/MissionFunctions';
+import PageContext from './page-context'
 
 // defines a websockets instance
 const socket = io();
 
 function App() {
-      
 
       // state of current time 
       const [currentTime, setCurrentTime] = useState();
@@ -119,6 +119,8 @@ function App() {
 
   return (
     <>
+      <PageContext.Provider value={{setPage}}>
+
         <div className='p-3'>
           {/* Page title */}
           <h1 className='text-4xl text-blue-500'>SeedGenCopter</h1>
@@ -137,10 +139,11 @@ function App() {
           <div>
             <h2 className='text-blue-500'>Mission Parameters</h2>
             <form className='my-3 flex flex-col place-items-center text-2xl'>
-              <Input name='Height' onChange={e => setDropHeight(e.target.value)} value={dropHeight}/>
-              <Input name='Columns' onChange={e => setDropColumns(e.target.value)} value={dropColumns}/>
+              <Input name='Height' onChange={e => setDropHeight(e.target.value)} value={dropHeight} unit='m'/>
+              <Input name='Spacing' onChange={e => setDropSpacing(e.target.value)} value={dropSpacing} unit='m'/>
+              <Input name='Columns' onChange={e => setDropColumns(e.target.value)} value={dropColumns} />
               <Input name='Rows' onChange={e => setDropRows(e.target.value)} value={dropRows}/>
-              <Input name='Spacing' onChange={e => setDropSpacing(e.target.value)} value={dropSpacing}/>
+              
             </form>
           </div>
 
@@ -163,7 +166,7 @@ function App() {
           
           <div className='flex flex-row text-center justify-center mt-10 mb-20'>
             <button 
-            onClick={() => setPage('log')} 
+            onClick={() => setPage('log')}
             className={'focus:outline-none' + ((page === 'log') ? ' text-blue-500' : ' text-black')}>
               <BsFillChatSquareDotsFill 
               className='text-5xl mx-10'/>
@@ -184,7 +187,7 @@ function App() {
           </div>
 
           </>
-
+          </PageContext.Provider>
     </>
   );
 }
