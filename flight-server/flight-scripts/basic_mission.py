@@ -93,9 +93,9 @@ def east_position(location):
 	# searches the string returned by MAVLink location call to get the east position in decimal format
 	return float(re.search('(?<=east=)-?[0-9]+.[0-9]+', location).group(0))
 
-def distance_magnitude(initial_n, initial_e, current_n, current_e):
+def distance_magnitude(pos1_north, pos1_east, pos2_north, pos2_east):
 	# calculates the hypothenuse using the north and east positions ( east and north can be negative )
-	return math.sqrt((current_n-initial_n)**2 + (current_e-initial_e)**2)
+	return math.sqrt((pos2_north-pos1_north)**2 + (pos2_east-pos1_east)**2)
 
 def goto_relative_to_home_location(north, east):	
 	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified location in the North, East, Down frame.
@@ -110,50 +110,13 @@ def goto_relative_to_home_location(north, east):
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
-	start = time.time()
-	while time.time() < start + 5:
+	print('-----')
+	time.sleep(2)
+	while vehicle.groundspeed > 0.25:
 		time.sleep(1)
-		print(str(vehicle.location.local_frame))
-	# initial_location = str(vehicle.location.local_frame) # Get initial location in string format
-	# initial_north = north_position(initial_location) # Use north position function to get number format of relative north pos
-	# initial_east = east_position(initial_location) # Use east position function to get number format of relative east pos
-	# distance_moved = 0 # initialise distance moved
-	# print('-----')
-	# while distance_moved < drop_spacing*0.96: # While distance moved is not close to user specified drop spacing
-	# 	# Calculate distance moved every 0.5 seconds
-	# 	distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
-	# 	print('Distance to destination: {}'.format(drop_spacing - distance_moved))
-	# 	time.sleep(0.5)
-	# print('Destination reached')
-	# print('-----')
-
-# def move_forward(drop_spacing):
-# 	goto_relative_to_home_location(drop_spacing, 0, 0)
-
-def set_yaw(heading, clockwise, relative=True):
-	if relative:
-		is_relative=1 #yaw relative to direction of travel
-	else:
-		is_relative=0 #yaw is an absolute angle
-	# create the CONDITION_YAW command using command_long_encode()
-	msg = vehicle.message_factory.command_long_encode(
-		0, 0,    # target system, target component
-		mavutil.mavlink.MAV_CMD_CONDITION_YAW, #command
-		0, #confirmation
-		heading,    # param 1, yaw in degrees
-		0,          # param 2, yaw speed deg/s
-		clockwise,	# param 3, direction -1 ccw, 1 cw
-		is_relative, # param 4, relative offset 1, absolute angle 0
-		0, 0, 0)    # param 5 ~ 7 not used
-	# send command to vehicle
-	vehicle.send_mavlink(msg)
-	time.sleep(3)
-
-def turn_right():
-	set_yaw(90, 1)
-
-def turn_left():
-	set_yaw(90, -1)
+		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
+	print('-----')
+	time.sleep(1)
 
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
@@ -170,12 +133,13 @@ def seed_planting_mission(total_rows, total_columns):
 
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
 			drop_seeds()
+			print('-----')
 
 			if column % 2 != 0 and row != total_rows: # if column is odd
-				print('Moving north to:')
+				print('Moving north {}m:'.format(drop_spacing))
 				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
 			elif column % 2 == 0  and row != total_rows: # if column is even
-				print('Moving south to')
+				print('Moving south {}m:'.format(drop_spacing))
 				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) )
 
 		if column == total_columns: # runs when the last row and column have been reached
@@ -197,7 +161,8 @@ vehicle = connectMyCopter()
 # Take off to specified drop height
 arm_and_takeoff(drop_height)
 # Start seed planting mission
-seed_planting_mission(drop_rows, drop_columns)
+while vehicle.mode=='GUIDED':
+	seed_planting_mission(drop_rows, drop_columns)
 # While vehicle is still armed, wait 1 second loop
 while vehicle.armed == True:
 	time.sleep(1)
