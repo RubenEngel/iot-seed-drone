@@ -3,12 +3,12 @@ import io from 'socket.io-client';
 import Input from './components/Input';
 import Route from './images/mission_route.png'
 import { BsFillChatSquareDotsFill, BsBarChartFill } from "react-icons/bs";
-import { AiFillControl } from 'react-icons/ai'
+import { AiFillControl, AiFillCamera } from 'react-icons/ai'
 import MissionLog from './components/MissionLog'
 import MissionStats from './components/MissionStats'
-// import MissionSetup from './components/MissionSetup'
 import MissionFunctions from './components/MissionFunctions';
-import PageContext from './page-context'
+import Camera from './components/Camera'
+import AppContext from './page-context'
 
 // defines a websockets instance
 const socket = io();
@@ -99,8 +99,8 @@ function App() {
         if (status === 'complete') {
           // setFlightStarted(false)
           // setMissionLog([])
-          setCol(0)
-          setRow(0)
+          setCol(null)
+          setRow(null)
         }})
          // switch on listener for flight stats
         socket.on('stats', (stats) => {
@@ -120,7 +120,7 @@ function App() {
 
   return (
     <>
-      <PageContext.Provider value={{setPage}}>
+      <AppContext.Provider value={{setPage, socket}}>
 
         <div className='p-3'>
           {/* Page title */}
@@ -150,6 +150,7 @@ function App() {
 
         </div>
 
+        {/* Start flight button */}
         <div className='mt-6'>
             <button 
               className='text-xl md:text-2xl py-2 px-4 mb-8 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
@@ -164,6 +165,7 @@ function App() {
           {page === 'log' && <MissionLog missionLogList={missionLogList}/>}
           {page === 'stats' && <MissionStats flightStats={flightStats} col={col} row={row}/>}
           {page === 'functions' && <MissionFunctions socket={socket}/>}
+          {page === 'camera' && <Camera/>}
           
           <div className='flex flex-row text-center justify-center mt-10 mb-20'>
             <button 
@@ -182,13 +184,13 @@ function App() {
               <AiFillControl 
               className='text-5xl mx-10'/>
             </button>
-            {/* <button onClick={() => setPage('camera')} className={'focus:outline-none' + ((page === 'stats') ? ' text-blue-500' : ' text-black')}>
-              <BsBarChartFill className='text-5xl mx-10'/>
-            </button> */}
+            <button onClick={() => setPage('camera')} className={'focus:outline-none' + ((page === 'camera') ? ' text-blue-500' : ' text-black')}>
+              <AiFillCamera className='text-5xl mx-10'/>
+            </button>
           </div>
 
           </>
-          </PageContext.Provider>
+          </AppContext.Provider>
     </>
   );
 }

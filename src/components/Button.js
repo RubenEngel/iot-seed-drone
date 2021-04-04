@@ -1,11 +1,11 @@
 import React from 'react'
 import { useContext } from 'react'
-import PageContext from '../page-context'
+import AppContext from '../page-context'
 
 
-function Button({socket, emit, colour, children}) {
+function Button({ emit, colour, children}) {
     
-    const { setPage } = useContext( PageContext )
+    const { socket, setPage } = useContext( AppContext )
 
     return (
         <div>

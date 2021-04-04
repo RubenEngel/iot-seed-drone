@@ -66,6 +66,10 @@ def return_to_launch():
     home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return home_process
 
+def drop_seeds():
+    seeds_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/disperse_seeds.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return seeds_process
+
 @socket.on('flight-start') # when flight start command received from frontend socket
 def on_flight_start():
     emit('message', 'Flight parameters sent successfully.')
@@ -91,12 +95,12 @@ def on_land():
 @socket.on('flight-home')
 def on_home():
     print('RETURN TO LAUNCH')
-    mission_process.terminate()
-    mission_process.wait()
-    home_process = return_to_launch()
+    mission_process.terminate() # cancel mission process
+    mission_process.wait() # wait until process is cancelled
+    home_process = return_to_launch() # start the return to home subprocess and set it to variable home_process
     while home_process.poll() is None: # while process is running
-        for line in iter(home_process.stdout.readline, b''):
-            emit('message', line.rstrip().decode('utf-8')) # send outputs to mission log
+        for line in iter(home_process.stdout.readline, b''): # for each line of the output
+            emit('message', line.rstrip().decode('utf-8')) # send output messages to mission log
 
 @socket.on('flight-stop')
 def on_flight_stop():
@@ -108,8 +112,15 @@ def on_flight_stop():
 def get_flight_stats():
     stats_process = start_stats()
     while stats_process.poll() is None: # while process is running
-        for line in iter(stats_process.stdout.readline, b''):
-            emit('stats', line.rstrip().decode('utf-8'))
+        for line in iter(stats_process.stdout.readline, b''): # for each line of the output
+            emit('stats', line.rstrip().decode('utf-8')) # send data to frontend
+
+@socket.on('drop-seeds')
+def on_drop_seeds():
+    seeds_process = drop_seeds()
+    while seeds_process.poll() is None: # while process is running
+        for line in iter(seeds_process.stdout.readline, b''): # for each line of the output
+            emit('message', line.rstrip().decode('utf-8')) # send output message to mission log
 
 if __name__ == '__main__':
     socket.run(app)
