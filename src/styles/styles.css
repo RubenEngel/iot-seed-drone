@@ -29,3 +29,8 @@ h2{
     height: calc(60vh);
     overflow-y: scroll;
   }
+
+  .player-wrapper {
+    position: relative;
+    padding-top: 75%;
+  }
