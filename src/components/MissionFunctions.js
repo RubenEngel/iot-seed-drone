@@ -8,6 +8,11 @@ function MissionFunctions({socket}) {
         <h2>Flight Functions</h2>
         <div className='mission-log flex flex-col justify-center'>
             <Button
+                emit={'drop-seeds'}
+                socket={socket}>
+                Drop Seeds
+            </Button>
+            <Button
                 emit={'flight-land'} 
                 socket={socket}>
                 Land
