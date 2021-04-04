@@ -78,6 +78,10 @@ def on_flight_start():
     while mission_process.poll() is None: # while process is running
         for line in iter(mission_process.stdout.readline, b''):
             emit('message', line.rstrip().decode('utf-8'))
+            if re.search('(?<=Column: )[0-9]+', line.rstrip().decode('utf-8')) is not None:
+                emit('column', re.search('(?<=Column: )[0-9]+', line.rstrip().decode('utf-8')).group(0))
+            if re.search('(?<=Row: )[0-9]+', line.rstrip().decode('utf-8')) is not None:
+                emit('row', re.search('(?<=Row: )[0-9]+', line.rstrip().decode('utf-8')).group(0))
     emit('message', 'Mission complete.')
     time.sleep(1)
     emit('status', 'complete')

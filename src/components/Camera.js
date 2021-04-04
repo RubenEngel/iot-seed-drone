@@ -3,7 +3,9 @@ import React from 'react'
 
 function Camera() {
     return (
-        <div className='mission-log flex flex-col justify-center'>
+        <>
+        <h2>Camera</h2>
+        <div className='mission-log md:text-2xl flex flex-col justify-center'>
             <Button
             
             >
@@ -15,6 +17,7 @@ function Camera() {
                 Download Image
             </Button>
         </div>
+        </>
     )
 }
 

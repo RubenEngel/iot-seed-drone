@@ -9,7 +9,7 @@ export default function MissionStats({flightStats, row, col}) {
     return(
     <>
         <h2>Flight Stats</h2>
-        <div className='grid grid-cols-2 grid-rows-6 mission-log'>
+        <div className='grid grid-cols-2 grid-rows-6 mission-log md:text-2xl'>
 
             <div className='self-center flex flex-row justify-center items-center'>
                <GiBattery100 className='mx-2'/>

@@ -88,11 +88,13 @@ function App() {
          // switch on listener for message (for mission log)
          socket.on('message', (data) => {
           console.log(data)
-          // const colRegExp = new RegExp('(?<=Column: )[0-9]+')
-          // const rowRegExp = new RegExp('(?<=Row: )[0-9]+')
-          // colRegExp.exec(data) && setCol(colRegExp.exec(data)[0])
-          // rowRegExp.exec(data) && setRow(rowRegExp.exec(data)[0])
           setMissionLog(missionLog => [...missionLog, data])
+        })
+        socket.on('column', (number) => {
+          setCol(number)
+        })
+        socket.on('row', (number) => {
+          setRow(number)
         })
         // switch on listener for flight status
         socket.on('status', (status) => {
@@ -124,7 +126,7 @@ function App() {
 
         <div className='p-3'>
           {/* Page title */}
-          <h1 className='text-4xl text-blue-500'>SeedGenCopter</h1>
+          <h1 className='text-3xl font-bold text-blue-500'>SeedGenCopter</h1>
           {/* Checks server connection by getting current time from server */}
           <h2 className=' text-base'>Server Status: {currentTime ? currentTime : 'Failed'}</h2>
         </div>
@@ -164,7 +166,7 @@ function App() {
 
           {page === 'log' && <MissionLog missionLogList={missionLogList}/>}
           {page === 'stats' && <MissionStats flightStats={flightStats} col={col} row={row}/>}
-          {page === 'functions' && <MissionFunctions socket={socket}/>}
+          {page === 'functions' && <MissionFunctions/>}
           {page === 'camera' && <Camera/>}
           
           <div className='flex flex-row text-center justify-center mt-10 mb-20'>
@@ -172,20 +174,20 @@ function App() {
             onClick={() => setPage('log')}
             className={'focus:outline-none' + ((page === 'log') ? ' text-blue-500' : ' text-black')}>
               <BsFillChatSquareDotsFill 
-              className='text-5xl mx-10'/>
+              className='text-4xl mx-5 md:mx-10'/>
             </button>
             <button 
             onClick={() => setPage('stats')} 
             className={'focus:outline-none' + ((page === 'stats') ? ' text-blue-500' : ' text-black')}>
               <BsBarChartFill 
-              className='text-5xl mx-10'/>
+              className='text-4xl mx-5 md:mx-10'/>
             </button>
             <button onClick={() => setPage('functions')} className={'focus:outline-none' + ((page === 'functions') ? ' text-blue-500' : ' text-black')}>
               <AiFillControl 
-              className='text-5xl mx-10'/>
+              className='text-4xl mx-5 md:mx-10'/>
             </button>
             <button onClick={() => setPage('camera')} className={'focus:outline-none' + ((page === 'camera') ? ' text-blue-500' : ' text-black')}>
-              <AiFillCamera className='text-5xl mx-10'/>
+              <AiFillCamera className='text-4xl mx-5 md:mx-10'/>
             </button>
           </div>
 
