@@ -169,7 +169,7 @@ function App() {
           {page === 'functions' && <MissionFunctions/>}
           {page === 'camera' && <Camera/>}
           
-          <div className='flex flex-row text-center justify-center mt-10 mb-20'>
+          <div className='flex flex-row text-center justify-center my-10'>
             <button 
             onClick={() => setPage('log')}
             className={'focus:outline-none' + ((page === 'log') ? ' text-blue-500' : ' text-black')}>

@@ -22,9 +22,10 @@ h2{
     border-width: 3px;
     @apply border-blue-500;
     margin: 30px auto;
-    padding: 40px;
+    padding: 14px;
     height: 70vh;
     width: 80%;
     color:black;
     height: calc(60vh);
+    overflow-y: scroll;
   }
