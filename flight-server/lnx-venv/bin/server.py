@@ -85,8 +85,8 @@ def on_land():
     mission_process.wait()
     land_process = land_mode()
     while land_process.poll() is None: # while process is running
-        for line in iter(land_process.stdout.readline, b''):
-            emit('message', line.rstrip().decode('utf-8'))
+        for line in iter(land_process.stdout.readline, b''): # read each line of output
+            emit('message', line.rstrip().decode('utf-8')) # send the output to the frontend app
 
 @socket.on('flight-home')
 def on_home():
@@ -95,7 +95,7 @@ def on_home():
     mission_process.wait()
     home_process = return_to_launch()
     while home_process.poll() is None: # while process is running
-        for line in iter(home_process.stdout.readline, b''):
+        for line in iter(home_process.stdout.readline, b''): # read each line of output
             emit('message', line.rstrip().decode('utf-8')) # send outputs to mission log
 
 @socket.on('flight-stop')
