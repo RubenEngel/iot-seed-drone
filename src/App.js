@@ -88,10 +88,10 @@ function App() {
          // switch on listener for message (for mission log)
          socket.on('message', (data) => {
           console.log(data)
-          const colRegExp = new RegExp('(?<=Column: )[0-9]+')
-          const rowRegExp = new RegExp('(?<=Row: )[0-9]+')
-          colRegExp.exec(data) && setCol(colRegExp.exec(data)[0])
-          rowRegExp.exec(data) && setRow(rowRegExp.exec(data)[0])
+          // const colRegExp = new RegExp('(?<=Column: )[0-9]+')
+          // const rowRegExp = new RegExp('(?<=Row: )[0-9]+')
+          // colRegExp.exec(data) && setCol(colRegExp.exec(data)[0])
+          // rowRegExp.exec(data) && setRow(rowRegExp.exec(data)[0])
           setMissionLog(missionLog => [...missionLog, data])
         })
         // switch on listener for flight status
