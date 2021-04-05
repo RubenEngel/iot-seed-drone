@@ -135,12 +135,13 @@ def seed_planting_mission(total_rows, total_columns):
 			drop_seeds()
 			print('-----')
 
-			if column % 2 != 0 and row != total_rows: # if column is odd
+			# This part starts running after the first drop in a column and handles moving to the next drop location
+			if column % 2 != 0 and row != total_rows: # if column is odd and not the last drop in the column
 				print('Moving north {}m:'.format(drop_spacing))
-				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
+				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) ) #  Column 1 is where the drone starts, hence move (column - 1). 
 			elif column % 2 == 0  and row != total_rows: # if column is even
 				print('Moving south {}m:'.format(drop_spacing))
-				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) )
+				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
 
 		if column == total_columns: # runs when the last row and column have been reached
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
