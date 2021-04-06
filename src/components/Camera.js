@@ -1,6 +1,6 @@
 import Button from './Button'
 import React from 'react'
-import ReactPlayer from 'react-player'
+// import ReactPlayer from 'react-player'
 
 function Camera() {
     return (
@@ -16,17 +16,12 @@ function Camera() {
                 />
             </div>
              */}
-             <img src='http://localhost:8080/stream/video.mjpeg'/>
+             <iframe title='video stream from drone' src='http://localhost:8080/stream/video.mjpeg'/>
 
             <Button
-            
+            emit={'image-capture'}
             >
                 Capture Image
-            </Button>
-            <Button
-            
-            >
-                Download Image
             </Button>
         </div>
         </>

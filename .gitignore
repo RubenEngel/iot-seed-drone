@@ -25,5 +25,7 @@ yarn-error.log*
 __pycache__
 
 /flight-server/pc-venv
+/flight-server/venv
+/flight-server/lnx-venv
 
 .eslintcache

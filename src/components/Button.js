@@ -3,16 +3,14 @@ import { useContext } from 'react'
 import AppContext from '../page-context'
 
 
-function Button({ emit, colour, children}) {
+function Button({ emit, className, children}) {
     
     const { socket, setPage } = useContext( AppContext )
 
     return (
-        <div>
-
-            <div className={'mb-10'}>
+            <div className={'my-4'}>
                 <button
-                className={'border-2 px-4 py-1 rounded-xl ' + colour}
+                className={'border-2 px-4 py-1 rounded-xl ' + className}
                 onClick={() => {
                 socket.emit(emit)
                 setPage('log')
@@ -20,8 +18,6 @@ function Button({ emit, colour, children}) {
                  {children}
                 </button>
             </div>
-
-        </div>
     )
 }
 

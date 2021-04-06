@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import Input from './components/Input';
 import Route from './images/mission_route.png'
@@ -17,7 +17,6 @@ function App() {
 
       // state of current time 
       const [currentTime, setCurrentTime] = useState();
-
       // state of user input drop height
       const [dropHeight, setDropHeight] = useState('')
       // state of user input drop columns
@@ -52,12 +51,13 @@ function App() {
         })
           .catch(err => console.log(err))
         } else {
-          console.log('Specify all parameters')
+          alert('Specify all parameters')
         }
         }
 
-      // state of flight start status, changes to true when user submits parameters
-      // const [flightStarted, setFlightStarted] = useState(false)
+      const myRef = useRef(null);
+
+      function scrollToLog() { myRef.current.scrollIntoView() }
 
       // state for what page view user is on, starts on mission log screen
       const [page, setPage] = useState('log')
@@ -116,7 +116,7 @@ function App() {
 
         return () => {
           socket.disconnect()
-        }; // disconnect sockets when app unmounts (is closed)
+        }; // disconnect sockets when app is closed
       }, [])
 
 
@@ -127,8 +127,8 @@ function App() {
         <div className='p-3'>
           {/* Page title */}
           <h1 className='text-3xl font-bold text-blue-500'>SeedGenCopter</h1>
-          {/* Checks server connection by getting current time from server */}
-          <h2 className=' text-base'>Server Status: {currentTime ? currentTime : 'Failed'}</h2>
+          {/* Checks server connection by getting current time from server, if current time is not available set status to failed */}
+          <p className='text-base'>Server Connection: {currentTime ? currentTime : 'Failed'}</p>
         </div>
 
         {/* {!flightStarted && // If the flight has not started render mission parameters page */}
@@ -156,7 +156,11 @@ function App() {
         <div className='mt-6'>
             <button 
               className='text-xl md:text-2xl py-2 px-4 mb-8 border-2 rounded-lg border-green-600 hover:bg-green-600 hover:text-white' 
-              onClick={() => submitParams()}
+              onClick={() => {
+                submitParams()
+                scrollToLog()
+                setPage('log')
+              }}
               >
                 Start Flight
             </button>
@@ -169,7 +173,7 @@ function App() {
           {page === 'functions' && <MissionFunctions/>}
           {page === 'camera' && <Camera/>}
           
-          <div className='flex flex-row text-center justify-center my-10'>
+          <div ref={myRef} className='flex flex-row text-center justify-center my-10'>
             <button 
             onClick={() => setPage('log')}
             className={'focus:outline-none' + ((page === 'log') ? ' text-blue-500' : ' text-black')}>

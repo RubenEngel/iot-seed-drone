@@ -20,9 +20,14 @@ function MissionFunctions() {
                 Return Home
             </Button>
             <Button 
-                colour={'bg-red-700 text-white'} 
+                className={'bg-red-700 text-white'} 
                 emit={'flight-stop'}>
                 Cancel Mission
+            </Button>
+            <Button 
+                className={'bg-red-700 text-white'} 
+                emit={'disarm'}>
+                Disarm
             </Button>
         </div>
         </>
