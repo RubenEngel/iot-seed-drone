@@ -1,8 +1,6 @@
 ###### Dependencies ######
 from dronekit import connect, VehicleMode
 import time
-import json
-import re
 import argparse
 
 ##### Functions ######

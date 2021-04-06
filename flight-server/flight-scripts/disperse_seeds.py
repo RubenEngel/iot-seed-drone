@@ -14,4 +14,4 @@ try: # logic to open and close USB connected motor for 0.3 seconds
 	time.sleep(0.3) # time that drops sufficient amount of seeds as tested
 	close_motor()
 except: # if connection to the motor is not possible dont crash programme, print error actuating
-	print('Error actuating.')
+	print('No seed actuator connected.')

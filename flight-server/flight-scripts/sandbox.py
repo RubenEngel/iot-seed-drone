@@ -1,34 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
+import subprocess
+import re
 
-drop_spacing = 5
-total_rows = 4
-total_columns = 4
+suitable_ground = True
 
-# def target_location():
+def analyse_ground(current_column, current_row):
+	current_location_image = '/home/pi/images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
+	compare_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', '--image1', '/home/pi/images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	while compare_process.poll() is None:
+		for line in iter(compare_process.stdout.readline, b''): # for each line of the output
+			print(line.rstrip().decode('utf-8')) # print the output
+			if re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')) is not None:
+				colour_difference = float(re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')).group(0))
+				global suitable_ground
+				if colour_difference <= 25:
+					suitable_ground = True
+				else:
+					suitable_ground = False
 
-for column in range(1, total_columns+1):
-
-		for row in range(1, total_rows+1): # runs until the second to last row (loops go to 1 before second argument)
-
-			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
-			print('Dropping seeds..')
-
-			if column % 2 != 0 and row != total_rows: # if column is odd
-				print('Moving north to:')
-				print( drop_spacing * (row), drop_spacing * (column - 1) )
-			elif column % 2 == 0  and row != total_rows: # if column is even
-				print('Moving south to')
-				print( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) )
-	
-		# print('Dropping seeds..')
-
-		if column == total_columns: # runs when the last row and column have been reached
-			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
-			print('Returning Home')
-		else: # this runs when the drone has reached the last row of column but not last column
-			if column % 2 != 0: # if column is odd and last row in column
-				print('Moving east to new column:')
-				print(drop_spacing * (total_rows - 1), drop_spacing * (column))
-			elif column % 2 == 0: # if column is even and last row in column
-				print('Moving east to new column:')
-				print( 0, drop_spacing * (column))
+analyse_ground(1, 2)
+print(suitable_ground)
