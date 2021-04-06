@@ -79,6 +79,10 @@ def drop_seeds():
     seeds_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/disperse_seeds.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return seeds_process
 
+def capture_image():
+    capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_image.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return capture_process
+
 @socket.on('flight-start') # when flight start command received from frontend socket
 def on_flight_start():
     emit('message', 'Flight parameters sent successfully.')
@@ -133,6 +137,13 @@ def on_drop_seeds():
     seeds_process = drop_seeds()
     while seeds_process.poll() is None: # while process is running
         for line in iter(seeds_process.stdout.readline, b''): # for each line of the output
+            emit('message', line.rstrip().decode('utf-8')) # send output message to mission log
+
+@socket.on('image-capture')
+def on_image_capture():
+    capture_process = capture_image()
+    while capture_process.poll() is None: # while process is running
+        for line in iter(capture_process.stdout.readline, b''): # for each line of the output
             emit('message', line.rstrip().decode('utf-8')) # send output message to mission log
 
 @socket.on('disarm')

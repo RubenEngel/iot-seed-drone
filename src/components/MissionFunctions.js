@@ -12,6 +12,10 @@ function MissionFunctions() {
                 Drop Seeds
             </Button>
             <Button
+                emit={'image-capture'}>
+                Capture Image
+            </Button>
+            <Button
                 emit={'flight-land'}>
                 Land
             </Button>
