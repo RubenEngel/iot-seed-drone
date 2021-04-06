@@ -163,6 +163,7 @@ def seed_planting_mission(total_rows, total_columns):
 			else:
 				capture_ground(column, row)
 				drop_seeds()
+				
 			print('-----')
 
 			# This part starts running after the first drop in a column and handles moving to the next drop location
