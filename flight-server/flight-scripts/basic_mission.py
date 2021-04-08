@@ -4,7 +4,6 @@
 from dronekit import connect, VehicleMode
 from pymavlink import mavutil
 import time
-import math
 import re
 import argparse
 import serial
@@ -102,7 +101,6 @@ def arm_and_takeoff(targetHeight):
 		time.sleep(0.75)
 	print("Target altitude reached")
 	print('----')
-	return None
 
 def goto_relative_to_home_location(north, east):	
 	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified location in the North, East, Down frame.
@@ -119,11 +117,38 @@ def goto_relative_to_home_location(north, east):
 	vehicle.send_mavlink(msg)
 	print('-----')
 	time.sleep(1.5)
-	while vehicle.groundspeed > 0.25:
+	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
 	print('-----')
-	time.sleep(1)
+
+def set_yaw(heading, clockwise, relative=True):
+	if relative:
+		is_relative=1 #yaw relative to direction of travel
+	else:
+		is_relative=0 #yaw is an absolute angle
+	# create the CONDITION_YAW command using command_long_encode()
+	msg = vehicle.message_factory.command_long_encode(
+		0, 0,    # target system, target component
+		mavutil.mavlink.MAV_CMD_CONDITION_YAW, #command
+		0, #confirmation
+		heading,    # param 1, yaw in degrees
+		0,          # param 2, yaw speed deg/s
+		clockwise,	# param 3, direction -1 ccw, 1 cw
+		is_relative, # param 4, relative offset 1, absolute angle 0
+		0, 0, 0)    # param 5 ~ 7 not used
+	# send command to vehicle
+	vehicle.send_mavlink(msg)
+	time.sleep(1.5)
+
+def look_north():
+	set_yaw(0, 1, False)
+
+def look_east():
+	set_yaw(90, -1, False)
+
+def look_south():
+	set_yaw(180, -1, False)
 
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
@@ -138,41 +163,44 @@ def seed_planting_mission(total_rows, total_columns):
 
 		for row in range(1, total_rows+1): # runs until the second to last row (loops go to 1 before second argument)
 
-			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
-			
-			if row != 1 and column != 1:
-				print('Analysing ground..')
-				analyse_ground(column, row) # captures image of current location and compares it to initial location
-				if suitable_ground == True: # if the ground similar in colour to initial location, drop seeds
-					print('Ground is suitable.')
-					drop_seeds()
-				else: # if the ground is not similar in colour to initial location, do not drop seeds
-					print('Ground is unsuitable')
-			else:
-				capture_ground(column, row)
-				drop_seeds()
+			print('Column: {}, Row: {}'.format(column, row)) # print what column and row currently at
+			drop_seeds()
+
+			# if row != 1 and column != 1:
+			# 	print('Analysing ground..')
+			# 	analyse_ground(column, row) # captures image of current location and compares it to initial location
+			# 	if suitable_ground == True: # if the ground similar in colour to initial location, drop seeds
+			# 		print('Ground is suitable.')
+			# 		drop_seeds()
+			# 	else: # if the ground is not similar in colour to initial location, do not drop seeds
+			# 		print('Ground is unsuitable')
+			# else:
+			# 	capture_ground(column, row) # takes a picture of the ground at the starting location
+			# 	drop_seeds()
 				
 			print('-----')
 
-			# This part starts running after the first drop in a column and handles moving to the next drop location
-			if column % 2 != 0 and row != total_rows: # if column is odd and not the last drop in the column
-				print('Moving north {}m:'.format(drop_spacing))
-				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
-			elif column % 2 == 0  and row != total_rows: # if column is even
-				print('Moving south {}m:'.format(drop_spacing))
-				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
-
-		# this part runs when all the rows in a column have been reached
-		if column == total_columns: # runs when the last row and column have been reached
-			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
-			return_home() # go back top starting location
-		else: # this runs when the drone has reached the last row of column but not last column
-			if column % 2 != 0: # if column is odd and last row in column
+			if column == total_columns and row == total_rows: # runs when the last row and column have been reached
+				return_home() # go back top starting location
+			elif column % 2 != 0 and row == total_rows:
 				print('Moving east to new column:')
+				look_east()
 				goto_relative_to_home_location(drop_spacing * (total_rows - 1), drop_spacing * (column))
-			elif column % 2 == 0: # if column is even and last row in column
+			elif column % 2 == 0 and row == total_rows:
 				print('Moving east to new column:')
+				look_east()
 				goto_relative_to_home_location(0, drop_spacing * (column))
+			# This part starts running after the first drop in a column and handles moving to the next drop location
+			elif column % 2 != 0: # if column is odd and not the last drop in the column
+				print('Moving north {}m:'.format(drop_spacing))
+				if row == 1:
+					look_north()
+				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
+			elif column % 2 == 0: # if column is even
+				print('Moving south {}m:'.format(drop_spacing))
+				if row == 1:
+					look_south()
+				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
 
 
 ###### Main Excecutable ######

@@ -1,11 +1,13 @@
+#!/usr/bin/env python2
+
 ###### Dependencies ######
 from dronekit import connect, VehicleMode
+from pymavlink import mavutil
 import time
-import math
 import re
 import argparse
-from pymavlink import mavutil
 import serial
+import subprocess
 
 ##### Functions ######
 
@@ -26,11 +28,8 @@ drop_columns = int(args.columns)
 drop_rows = int(args.rows)
 
 def connectMyCopter():
-
 	connection_string = args.connect # use connection ip address of drone from user input
-
 	vehicle = connect(connection_string, wait_ready = True) # dronekit vehicle connection using ip address
-
 	return vehicle # when fucntion is run, return vehicle constant to be used to control drone by other functions
 
 def drop_seeds():	
@@ -43,13 +42,36 @@ def drop_seeds():
 			ser.flush() # clear previous signals to arduino
 			ser.write(b'0') # send 0 signal to arduino
 
-		open_motor()
+		open_motor() # send open signal to arduino
 		print('Dropping seeds..')
 		time.sleep(0.3) # time that drops sufficient amount of seeds as tested
-		close_motor()
+		close_motor() # send close signal to arduino
 
 	except: # if connection to the motor is not possible dont crash programme, print error actuating
-		print('Error actuating.')
+		print('No actuator connected.')
+
+def capture_ground(column, row):
+	capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_ground.py', '--column', str(column), '--row', str(row)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	while capture_process.poll() is None:
+		for line in iter(capture_process.stdout.readline, b''): # for each line of the output
+			print(line.rstrip().decode('utf-8')) # print the output
+
+suitable_ground = True
+
+def analyse_ground(current_column, current_row):
+	capture_ground(current_column, current_row)
+	current_location_image = '/home/pi/images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
+	compare_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', '--image1', '/home/pi/images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	while compare_process.poll() is None:
+		for line in iter(compare_process.stdout.readline, b''): # for each line of the output
+			print(line.rstrip().decode('utf-8')) # print the output
+			if re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')) is not None:
+				colour_difference = float(re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')).group(0))
+				global suitable_ground
+				if colour_difference <= 25:
+					suitable_ground = True
+				else:
+					suitable_ground = False
 
 def arm_and_takeoff(targetHeight):
 	while vehicle.is_armable != True: # while the vehicle is not armable, wait.
@@ -62,15 +84,15 @@ def arm_and_takeoff(targetHeight):
 	while vehicle.mode!='GUIDED':
 		print("Waiting for drone to enter GUIDED flight mode")
 		time.sleep(1)
-	print("Vehicle now in GUIDED MODE")
+	print("Vehicle now in GUIDED flight mode")
 
 	vehicle.armed = True  # time delay in this request. While loop waits for success.
 	while vehicle.armed==False:
 		print("Waiting for vehicle to become armed")
 		time.sleep(1)
-	print("Props are spinning!")
+	print("vehicle is armed.")
 
-	vehicle.simple_takeoff(targetHeight) ## in metres
+	vehicle.simple_takeoff(targetHeight) # takeoff drone to height in metres
 
 	while True:
 		print("Current Altitude: %.2f" % vehicle.location.global_relative_frame.alt)
@@ -79,55 +101,27 @@ def arm_and_takeoff(targetHeight):
 		time.sleep(0.75)
 	print("Target altitude reached")
 	print('----')
-	return None
 
-def north_position(location):
-	# searches the string returned by MAVLink location call to get the north position
-	return float(re.search('(?<=north=)-?[0-9]+.[0-9]+', location).group(0))
-
-def east_position(location):
-	# searches the string returned by MAVLink location call to get the east position
-	return float(re.search('(?<=east=)-?[0-9]+.[0-9]+', location).group(0))
-
-def distance_magnitude(initial_n, initial_e, current_n, current_e):
-	# calculates the hypothenuse using the north and east positions ( east and north can be negative )
-	return math.sqrt((current_n-initial_n)**2 + (current_e-initial_e)**2)
-
-def goto_relative_to_current_location(north, east, down):	
+def goto_relative_to_home_location(north, east):	
 	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified location in the North, East, Down frame.
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
-		0,       # time_boot_ms (not used)
-		0, 0,    # target system, target component
-		mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, # frame - body frame relative to current vehicle location
-		0b0000111111111000, # type_mask (only positions enabled)
-		north, east, down, # North, East, Down in the MAV_FRAME_BODY_NED frame
+		0,		# time_boot_ms (not used)
+		0, 0,	# target system, target component
+		mavutil.mavlink.MAV_FRAME_LOCAL_NED,	# frame - position is relative to home location (North, East, Down frame)
+		0b0000111111111000,	# type_mask (only positions enabled)
+		north, east, -drop_height, # North, East, Down position
 		0, 0, 0, # x, y, z velocity in m/s  (not used)
 		0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
-	# initial_location = str(vehicle.location.local_frame) # Get initial location in string format
-	# # initial_north = north_position(initial_location) # Use north position function to get number format of relative north pos
-	# # initial_east = east_position(initial_location) # Use east position function to get number format of relative east pos
-	# distance_moved = 0 # initialise distance moved
-	# print('-----')
-	# while distance_moved < drop_spacing*0.96: # While distance moved is not close to user specified drop spacing
-	# 	# Calculate distance moved every 0.5 seconds
-	# 	distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
-	# 	print('Distance to destination: {}'.format(drop_spacing - distance_moved))
-	# 	time.sleep(0.5)
-	# print('Destination reached')
-	# print('-----')
 	print('-----')
 	time.sleep(1.5)
-	while vehicle.groundspeed > 0.25:
+	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
 	print('-----')
 	time.sleep(1)
-
-def move_forward(drop_spacing):
-	goto_relative_to_current_location(drop_spacing, 0, 0)
 
 def set_yaw(heading, clockwise, relative=True):
 	if relative:
@@ -146,48 +140,57 @@ def set_yaw(heading, clockwise, relative=True):
 		0, 0, 0)    # param 5 ~ 7 not used
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
+	# while vehicle.heading > heading*0.95 and vehicle.heading < heading*1.05:
 	time.sleep(1.5)
 
-def turn_right():
-	set_yaw(90, 1)
+def look_north():
+	set_yaw(0, 1, False)
 
-def turn_left():
-	set_yaw(90, -1)
+def look_east():
+	set_yaw(90, -1, False)
+
+def look_south():
+	set_yaw(180, -1, False)
 
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
 	while vehicle.mode != "RTL": # wait for the mode to change.
 		time.sleep(1)
-		print("Drone is returning home.")
+		print("Drone is entering return to launch mode..")
+	print("Drone is returning home")
 
-def seed_planting_mission(drop_rows, drop_columns):
-	for column in range(1, drop_columns+1): 
+def seed_planting_mission(total_rows, total_columns):
 
-		for row in range(1, drop_rows+1):
-			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
+	for column in range(1, total_columns+1):
+
+		for row in range(1, total_rows+1): # runs until the second to last row (loops go to 1 before second argument)
+
+			print('Column: {}, Row: {}'.format(column, row)) # print what column and row currently at
 			drop_seeds()
+				
+			print('-----')
 
-			if column == drop_columns and row == drop_rows: # if all column and rows have been reached, return home.
-				return_home()
-			elif column % 2 != 0 and row == drop_rows: # if column is odd and row is last, move right to get to new column.
-				print('Moving right to new column.')
-				turn_right()
-				move_forward(drop_spacing)
-			elif column % 2 == 0 and row == 1: # if column is even & is first row in column move right.
-				print('Moving Right {}m'.format(drop_spacing))
-				turn_right()
-				move_forward(drop_spacing)
-			elif column % 2 == 0 and row == drop_rows: # if column is even and row is last, move left to get to new column.
-				print('Moving left to new column.')
-				turn_left()
-				move_forward(drop_spacing)
-			elif column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first row in column, move left. 
-				print('Moving Left {}m'.format(drop_spacing))
-				turn_left()
-				move_forward(drop_spacing)
-			else: # if none of the conditions previous have been met, move forward.
-				print('Moving Forward {}m'.format(drop_spacing))
-				move_forward(drop_spacing)
+			if column == total_columns and row == total_rows: # runs when the last row and column have been reached
+				return_home() # go back top starting location
+			elif column % 2 != 0 and row == total_rows:
+				print('Moving east to new column:')
+				look_east()
+				goto_relative_to_home_location(drop_spacing * (total_rows - 1), drop_spacing * (column))
+			elif column % 2 == 0 and row == total_rows:
+				print('Moving east to new column:')
+				look_east()
+				goto_relative_to_home_location(0, drop_spacing * (column))
+			# This part starts running after the first drop in a column and handles moving to the next drop location
+			elif column % 2 != 0: # if column is odd and not the last drop in the column
+				print('Moving north {}m:'.format(drop_spacing))
+				if row == 1:
+					look_north()
+				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
+			elif column % 2 == 0: # if column is even
+				print('Moving south {}m:'.format(drop_spacing))
+				if row == 1:
+					look_south()
+				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
 
 
 ###### Main Excecutable ######
@@ -197,7 +200,9 @@ vehicle = connectMyCopter()
 # Take off to specified drop height
 arm_and_takeoff(drop_height)
 # Start seed planting mission
-seed_planting_mission(drop_rows, drop_columns)
+while vehicle.mode=='GUIDED':
+	seed_planting_mission(drop_rows, drop_columns)
 # While vehicle is still armed, wait 1 second loop
-while vehicle.armed == True:
-	time.sleep(1)
+# while vehicle.armed == True:
+# 	time.sleep(1)
+print('End of mission')
