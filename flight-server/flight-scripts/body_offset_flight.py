@@ -100,7 +100,7 @@ def goto_relative_to_current_location(north, east, down):
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
 		0,       # time_boot_ms (not used)
 		0, 0,    # target system, target component
-		mavutil.mavlink.MAV_FRAME_BODY_NED, # frame - body frame relative to current vehicle location
+		mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, # frame - body frame relative to current vehicle location
 		0b0000111111111000, # type_mask (only positions enabled)
 		north, east, down, # North, East, Down in the MAV_FRAME_BODY_NED frame
 		0, 0, 0, # x, y, z velocity in m/s  (not used)
@@ -108,18 +108,25 @@ def goto_relative_to_current_location(north, east, down):
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
-	initial_location = str(vehicle.location.local_frame) # Get initial location in string format
-	# initial_north = north_position(initial_location) # Use north position function to get number format of relative north pos
-	# initial_east = east_position(initial_location) # Use east position function to get number format of relative east pos
-	distance_moved = 0 # initialise distance moved
+	# initial_location = str(vehicle.location.local_frame) # Get initial location in string format
+	# # initial_north = north_position(initial_location) # Use north position function to get number format of relative north pos
+	# # initial_east = east_position(initial_location) # Use east position function to get number format of relative east pos
+	# distance_moved = 0 # initialise distance moved
+	# print('-----')
+	# while distance_moved < drop_spacing*0.96: # While distance moved is not close to user specified drop spacing
+	# 	# Calculate distance moved every 0.5 seconds
+	# 	distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
+	# 	print('Distance to destination: {}'.format(drop_spacing - distance_moved))
+	# 	time.sleep(0.5)
+	# print('Destination reached')
+	# print('-----')
 	print('-----')
-	while distance_moved < drop_spacing*0.96: # While distance moved is not close to user specified drop spacing
-		# Calculate distance moved every 0.5 seconds
-		distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
-		print('Distance to destination: {}'.format(drop_spacing - distance_moved))
-		time.sleep(0.5)
-	print('Destination reached')
+	time.sleep(1.5)
+	while vehicle.groundspeed > 0.25:
+		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
+		time.sleep(1)
 	print('-----')
+	time.sleep(1)
 
 def move_forward(drop_spacing):
 	goto_relative_to_current_location(drop_spacing, 0, 0)
@@ -156,44 +163,35 @@ def return_home():
 		time.sleep(1)
 		print("Drone is returning home.")
 
-def seed_planting_mission(rows, columns):
+def seed_planting_mission(drop_rows, drop_columns):
 	for column in range(1, drop_columns+1): 
 
-		for row in range(1, drop_rows):
+		for row in range(1, drop_rows+1):
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
 			drop_seeds()
 
-			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first drop in that column, turn left. 
-				print('Moving Left {}m'.format(drop_spacing))
-				turn_left()
+			if column == drop_columns and row == drop_rows: # if all column and rows have been reached, return home.
+				return_home()
+			elif column % 2 != 0 and row == drop_rows: # if column is odd and row is last, move right to get to new column.
+				print('Moving right to new column.')
+				turn_right()
 				move_forward(drop_spacing)
-			elif column % 2 == 0 and row == 1: # if column is even & is first drop in that column turn right.
+			elif column % 2 == 0 and row == 1: # if column is even & is first row in column move right.
 				print('Moving Right {}m'.format(drop_spacing))
 				turn_right()
 				move_forward(drop_spacing)
-			else: # otherwise, move forward.
-				print('Moving Forward {}m'.format(drop_spacing))
-				move_forward(drop_spacing)
-			
-		if column == drop_columns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
-			print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
-			drop_seeds()
-			return_home()
-		else:
-			if column % 2 != 0: # if column is odd, move right to get to new column.
-				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
-				drop_seeds()
-				print('Moving to new column.')
-				turn_right()
-				move_forward(drop_spacing)
-			elif column % 2 == 0: # if column is even, move left to get to new column.
-				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
-				drop_seeds()
-				print('Moving to new column.')
+			elif column % 2 == 0 and row == drop_rows: # if column is even and row is last, move left to get to new column.
+				print('Moving left to new column.')
 				turn_left()
 				move_forward(drop_spacing)
-			else:
-				print('Problem Moving Column')
+			elif column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first row in column, move left. 
+				print('Moving Left {}m'.format(drop_spacing))
+				turn_left()
+				move_forward(drop_spacing)
+			else: # if none of the conditions previous have been met, move forward.
+				print('Moving Forward {}m'.format(drop_spacing))
+				move_forward(drop_spacing)
+
 
 ###### Main Excecutable ######
 

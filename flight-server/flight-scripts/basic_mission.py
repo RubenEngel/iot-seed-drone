@@ -104,18 +104,6 @@ def arm_and_takeoff(targetHeight):
 	print('----')
 	return None
 
-def north_position(location):
-	# searches the string returned by MAVLink location call to get the north position in decimal format
-	return float(re.search('(?<=north=)-?[0-9]+.[0-9]+', location).group(0))
-
-def east_position(location):
-	# searches the string returned by MAVLink location call to get the east position in decimal format
-	return float(re.search('(?<=east=)-?[0-9]+.[0-9]+', location).group(0))
-
-def distance_magnitude(pos1_north, pos1_east, pos2_north, pos2_east):
-	# calculates the hypothenuse using the north and east positions ( east and north can be negative )
-	return math.sqrt((pos2_north-pos1_north)**2 + (pos2_east-pos1_east)**2)
-
 def goto_relative_to_home_location(north, east):	
 	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified location in the North, East, Down frame.
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
@@ -132,8 +120,8 @@ def goto_relative_to_home_location(north, east):
 	print('-----')
 	time.sleep(1.5)
 	while vehicle.groundspeed > 0.25:
-		time.sleep(1)
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
+		time.sleep(1)
 	print('-----')
 	time.sleep(1)
 
@@ -169,7 +157,7 @@ def seed_planting_mission(total_rows, total_columns):
 			# This part starts running after the first drop in a column and handles moving to the next drop location
 			if column % 2 != 0 and row != total_rows: # if column is odd and not the last drop in the column
 				print('Moving north {}m:'.format(drop_spacing))
-				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) ) #  Column 1 is where the drone starts, hence move (column - 1). 
+				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
 			elif column % 2 == 0  and row != total_rows: # if column is even
 				print('Moving south {}m:'.format(drop_spacing))
 				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
