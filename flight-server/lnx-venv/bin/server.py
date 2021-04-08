@@ -1,13 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
 import time
 import subprocess
-import io
-import asyncio
 import re
-import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -66,6 +63,10 @@ def return_to_launch():
     home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return home_process
 
+def disarm_drone():
+    disarm_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/disarm.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    return disarm_process
+
 def drop_seeds():
     seeds_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/ruben/iot-seed-drone/flight-server/flight-scripts/disperse_seeds.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return seeds_process
@@ -88,7 +89,6 @@ def on_flight_start():
 
 @socket.on('flight-land')
 def on_land():
-    print('LAND')
     mission_process.terminate()
     mission_process.wait()
     land_process = land_mode()
@@ -98,9 +98,9 @@ def on_land():
 
 @socket.on('flight-home')
 def on_home():
-    print('RETURN TO LAUNCH')
-    mission_process.terminate()
-    mission_process.wait()
+    if mission_process is not None:
+        mission_process.terminate()
+        mission_process.wait()
     home_process = return_to_launch()
     while home_process.poll() is None: # while process is running
         for line in iter(home_process.stdout.readline, b''): # read each line of output
@@ -108,7 +108,6 @@ def on_home():
 
 @socket.on('flight-stop')
 def on_flight_stop():
-    print('FLIGHT STOP')
     mission_process.terminate()
     mission_process.wait()
 
@@ -126,6 +125,15 @@ def on_drop_seeds():
         for line in iter(seeds_process.stdout.readline, b''): # for each line of the output
             emit('message', line.rstrip().decode('utf-8')) # send output message to mission log
 
+@socket.on('disarm')
+def on_disarm():
+    if mission_process is not None:
+        mission_process.terminate()
+        mission_process.wait()
+    disarm_process = disarm_drone()
+    while disarm_process.poll() is None: # while process is running
+        for line in iter(disarm_process.stdout.readline, b''): # for each line of the output
+            emit('message', line.rstrip().decode('utf-8')) # send output message to mission log
 
 if __name__ == '__main__':
     socket.run(app)

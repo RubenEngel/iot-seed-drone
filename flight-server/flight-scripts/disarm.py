@@ -21,10 +21,11 @@ def connectMyCopter():
 
 vehicle = connectMyCopter()
 
+
 vehicle.armed = False
 
 while vehicle.armed != False:
 	print("Waiting for drone to disarm..")
-	time.sleep(0.5)
+	time.sleep(1)
 	
 print("Vehicle disarmed")

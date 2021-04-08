@@ -116,7 +116,7 @@ def goto_relative_to_home_location(north, east):
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
 	print('-----')
-	time.sleep(1.5)
+	time.sleep(2)
 	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
@@ -212,7 +212,3 @@ arm_and_takeoff(drop_height)
 # Start seed planting mission
 while vehicle.mode=='GUIDED':
 	seed_planting_mission(drop_rows, drop_columns)
-# While vehicle is still armed, wait 1 second loop
-# while vehicle.armed == True:
-# 	time.sleep(1)
-print('End of mission')

@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import datetime
 import time
 import subprocess
-import io
-import asyncio
 import re
-import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -101,7 +98,6 @@ def on_flight_start():
 
 @socket.on('flight-land')
 def on_land():
-    print('LAND')
     mission_process.terminate()
     mission_process.wait()
     land_process = land_mode()
@@ -111,9 +107,9 @@ def on_land():
 
 @socket.on('flight-home')
 def on_home():
-    print('RETURN TO LAUNCH')
-    mission_process.terminate() # cancel mission process
-    mission_process.wait() # wait until process is cancelled
+    if mission_process is not None:
+        mission_process.terminate()
+        mission_process.wait()
     home_process = return_to_launch() # start the return to home subprocess and set it to variable home_process
     while home_process.poll() is None: # while process is running
         for line in iter(home_process.stdout.readline, b''): # for each line of the output
@@ -121,7 +117,6 @@ def on_home():
 
 @socket.on('flight-stop')
 def on_flight_stop():
-    print('FLIGHT STOP')
     mission_process.terminate()
     mission_process.wait()
 
@@ -148,6 +143,9 @@ def on_image_capture():
 
 @socket.on('disarm')
 def on_disarm():
+    if mission_process is not None:
+        mission_process.terminate()
+        mission_process.wait()
     disarm_process = disarm_drone()
     while disarm_process.poll() is None: # while process is running
         for line in iter(disarm_process.stdout.readline, b''): # for each line of the output
