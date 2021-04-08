@@ -100,7 +100,7 @@ def goto_relative_to_current_location(north, east, down):
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
 		0,       # time_boot_ms (not used)
 		0, 0,    # target system, target component
-		mavutil.mavlink.MAV_FRAME_BODY_NED, # frame - body frame relative to current vehicle location
+		mavutil.mavlink.MAV_FRAME_BODY_OFFSET_NED, # frame - body frame relative to current vehicle location
 		0b0000111111111000, # type_mask (only positions enabled)
 		north, east, down, # North, East, Down in the MAV_FRAME_BODY_NED frame
 		0, 0, 0, # x, y, z velocity in m/s  (not used)
@@ -156,44 +156,35 @@ def return_home():
 		time.sleep(1)
 		print("Drone is returning home.")
 
-def seed_planting_mission(rows, columns):
+def seed_planting_mission(drop_rows, drop_columns):
 	for column in range(1, drop_columns+1): 
 
-		for row in range(1, drop_rows):
+		for row in range(1, drop_rows+1):
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
 			drop_seeds()
 
-			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first drop in that column, turn left. 
+			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first row in column, move left. 
 				print('Moving Left {}m'.format(drop_spacing))
 				turn_left()
 				move_forward(drop_spacing)
-			elif column % 2 == 0 and row == 1: # if column is even & is first drop in that column turn right.
+			elif column % 2 == 0 and row == 1: # if column is even & is first row in column move right.
 				print('Moving Right {}m'.format(drop_spacing))
 				turn_right()
+				move_forward(drop_spacing)
+			elif column % 2 != 0 and row == drop_rows: # if column is odd and row is last, move right to get to new column.
+				print('Moving right to new column.')
+				turn_right()
+				move_forward(drop_spacing)
+			elif column % 2 == 0 and row == drop_rows: # if column is even and row is last, move left to get to new column.
+				print('Moving left to new column.')
+				turn_left()
 				move_forward(drop_spacing)
 			else: # otherwise, move forward.
 				print('Moving Forward {}m'.format(drop_spacing))
 				move_forward(drop_spacing)
 			
-		if column == drop_columns: # if last column, return to launch. (as the row loop for the last column has finished, the mission is complete.)
-			print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
-			drop_seeds()
-			return_home()
-		else:
-			if column % 2 != 0: # if column is odd, move right to get to new column.
-				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
-				drop_seeds()
-				print('Moving to new column.')
-				turn_right()
-				move_forward(drop_spacing)
-			elif column % 2 == 0: # if column is even, move left to get to new column.
-				print('Column: %d, Row: %d' % (column, row+1)) # print what column and row currently at
-				drop_seeds()
-				print('Moving to new column.')
-				turn_left()
-				move_forward(drop_spacing)
-			else:
-				print('Problem Moving Column')
+	# Once all columns have been reached and the row loop has finished, the mission is complete.
+	return_home()
 
 ###### Main Excecutable ######
 
