@@ -163,7 +163,10 @@ def seed_planting_mission(drop_rows, drop_columns):
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
 			drop_seeds()
 
-			if column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first row in column, move left. 
+			if column == drop_columns and row == drop_rows:
+				# Once all columns have been reached and the row loop has finished, the mission is complete.
+				return_home()
+			elif column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first row in column, move left. 
 				print('Moving Left {}m'.format(drop_spacing))
 				turn_left()
 				move_forward(drop_spacing)
@@ -182,9 +185,7 @@ def seed_planting_mission(drop_rows, drop_columns):
 			else: # otherwise, move forward.
 				print('Moving Forward {}m'.format(drop_spacing))
 				move_forward(drop_spacing)
-			
-	# Once all columns have been reached and the row loop has finished, the mission is complete.
-	return_home()
+
 
 ###### Main Excecutable ######
 
