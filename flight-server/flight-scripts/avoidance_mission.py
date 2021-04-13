@@ -23,8 +23,8 @@ parser.add_argument('--columns')
 args = parser.parse_args()
 
 connection_string = '127.0.0.1:14550' #args.connect
-drop_height = 2 #float(args.height)
-drop_spacing = 8 #float(args.spacing)
+drop_height = 3 #float(args.height)
+drop_spacing = 5 #float(args.spacing)
 drop_columns = 3 #int(args.columns)
 drop_rows = 3 #int(args.rows)
 
@@ -193,7 +193,7 @@ def seed_planting_mission():
 ranges = None
 obstacle_distance = None # the minimum distacne read from lidar sensor
 min_distance_index = None # where in the array is the minimum distance found (end of array is the left-most point)
-avoid_distance = 3 # stay 2 meters away from
+avoid_distance = 2 # stay 2 meters away from
 
 def scan_callback(scan_msg):
     """ scan will be of type LaserScan """
@@ -295,8 +295,6 @@ vehicle = connectMyCopter()
 # Take off to specified drop height
 arm_and_takeoff(drop_height)
 
-obstacle_avoidance()
-
 # Start seed planting mission
-# while vehicle.mode=='GUIDED':
-	# seed_planting_mission(drop_rows, drop_columns)
+while vehicle.mode=='GUIDED':
+	seed_planting_mission()
