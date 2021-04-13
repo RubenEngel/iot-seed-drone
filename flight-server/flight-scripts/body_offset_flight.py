@@ -119,8 +119,8 @@ def goto_relative_to_current_location(north, east, down):
 	# print('Destination reached')
 	# print('-----')
 	print('-----')
-	time.sleep(1.5)
-	while vehicle.groundspeed > 0.25:
+	time.sleep(2)
+	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
 	print('-----')
@@ -161,7 +161,7 @@ def return_home():
 		print("Drone is returning home.")
 
 def seed_planting_mission(drop_rows, drop_columns):
-	for column in range(1, drop_columns+1): 
+	for column in range(1, drop_columns+1):
 
 		for row in range(1, drop_rows+1):
 			print('Column: %d, Row: %d' % (column, row)) # print what column and row currently at
