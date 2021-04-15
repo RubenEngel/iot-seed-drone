@@ -43,3 +43,4 @@ delta_e = delta_e_cie2000(image1_lab, image2_lab)
 # print('Analysis Complete')
 
 print('Colour Difference: ' + f'{delta_e:.2f}')
+

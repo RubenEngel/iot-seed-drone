@@ -27,10 +27,51 @@ drop_spacing = float(args.spacing)
 drop_columns = int(args.columns)
 drop_rows = int(args.rows)
 
-def connect_copter():
+def connectMyCopter():
 	connection_string = args.connect # use connection ip address of drone from user input
 	vehicle = connect(connection_string, wait_ready = True) # dronekit vehicle connection using ip address
 	return vehicle # when fucntion is run, return vehicle constant to be used to control drone by other functions
+
+def drop_seeds():	
+	try: # logic to open and close USB connected motor for 0.3 seconds 	
+		ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1) # connection location of USB arduino set to 'ser' constant
+		def open_motor(): # defines the open motor function
+			ser.flush() # clear previous signals to arduino
+			ser.write(b'1') # send 1 signal to arduino
+		def close_motor(): # define close motor function
+			ser.flush() # clear previous signals to arduino
+			ser.write(b'0') # send 0 signal to arduino
+
+		open_motor() # send open signal to arduino
+		print('Dropping seeds..')
+		time.sleep(0.3) # time that drops sufficient amount of seeds as tested
+		close_motor() # send close signal to arduino
+
+	except: # if connection to the motor is not possible dont crash programme, print error actuating
+		print('No actuator connected.')
+
+def capture_ground(column, row):
+	capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_ground.py', '--column', str(column), '--row', str(row)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	while capture_process.poll() is None:
+		for line in iter(capture_process.stdout.readline, b''): # for each line of the output
+			print(line.rstrip().decode('utf-8')) # print the output
+
+suitable_ground = True
+
+def analyse_ground(current_column, current_row):
+	capture_ground(current_column, current_row)
+	current_location_image = '/home/pi/images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
+	compare_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', '--image1', '/home/pi/images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	while compare_process.poll() is None:
+		for line in iter(compare_process.stdout.readline, b''): # for each line of the output
+			print(line.rstrip().decode('utf-8')) # print the output
+			if re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')) is not None:
+				colour_difference = float(re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')).group(0))
+				global suitable_ground
+				if colour_difference <= 25:
+					suitable_ground = True
+				else:
+					suitable_ground = False
 
 def arm_and_takeoff(targetHeight):
 	while vehicle.is_armable != True: # while the vehicle is not armable, wait.
@@ -74,8 +115,9 @@ def goto_relative_to_home_location(north, east):
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
+	
 	print('-----')
-	time.sleep(2) # to allow time for the drone to start moving
+	time.sleep(2)
 	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
@@ -98,18 +140,16 @@ def set_yaw(heading, clockwise, relative=True):
 		0, 0, 0)    # param 5 ~ 7 not used
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
+	# while vehicle.heading > heading*0.95 and vehicle.heading < heading*1.05:
 	time.sleep(1.5)
 
 def look_north():
-	# look to a yaw of 0 degrees, in absolute angle
 	set_yaw(0, 1, False)
 
 def look_east():
-	# look to a yaw of 90 degrees, in absolute angle
 	set_yaw(90, -1, False)
 
 def look_south():
-	# look to a yaw of 180 degrees, in absolute angle
 	set_yaw(180, -1, False)
 
 def return_home():
@@ -119,69 +159,6 @@ def return_home():
 		print("Drone is entering return to launch mode..")
 	print("Drone is returning home")
 
-def drop_seeds():	
-	try: # logic to open and close USB connected motor for 0.3 seconds 	
-		ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1) # connection location of USB arduino set to 'ser' constant
-		def open_motor(): # defines the open motor function
-			ser.flush() # clear previous signals to arduino
-			ser.write(b'1') # send 1 signal to arduino
-		def close_motor(): # define close motor function
-			ser.flush() # clear previous signals to arduino
-			ser.write(b'0') # send 0 signal to arduino
-
-		open_motor() # send open signal to arduino
-		print('Dropping seeds..')
-		time.sleep(0.3) # time that drops sufficient amount of seeds as tested
-		close_motor() # send close signal to arduino
-
-	except: # if connection to the motor is not possible dont crash programme, print error actuating
-		print('No actuator connected.')
-
-def capture_ground(column, row):
-	# capture an image of the ground and save it with a name referring to its row and column
-	capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', \
-		'/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_ground.py',\
-		'--column', str(column), '--row', str(row)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	# while the capture process is running
-	while capture_process.poll() is None:
-		# for each line of its output
-		for line in iter(capture_process.stdout.readline, b''):
-			# print the output to this scripts output
-			print(line.rstrip().decode('utf-8')) 
-
-# Initialise the suitable_ground variable as True
-suitable_ground = True
-
-def analyse_ground(current_column, current_row):
-	# run the capture image function to take an image of the current location
-	capture_ground(current_column, current_row)
-	# the image is saved to the raspberry pi in the following format
-	current_location_image = '/home/pi/images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
-	# run the image comparison script with image 1 as the start drop location and image 2 as the current drop location
-	compare_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3',\
-		'/home/pi/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', \
-		'--image1', '/home/pi/images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	# while the comparison process is running
-	while compare_process.poll() is None:
-		#  for each of line of the process' output
-		for line in iter(compare_process.stdout.readline, b''):
-			# print the output of the process
-			print(line.rstrip().decode('utf-8'))
-			# if the output line has 'Colour Difference: ' followed by a number
-			if re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')) is not None:
-				# convert the number (that is in string format) into a decimal number format and save it to the variable, colour_difference
-				colour_difference = float(re.search('(?<=Colour Difference: )[0-9]+.[0-9]+', line.rstrip().decode('utf-8')).group(0))
-				# use the global variable suitable_ground
-				global suitable_ground
-				# if the colour difference (CIELAB Delta E) is less than or equal to 25
-				if colour_difference <= 25:
-					# the ground is suitable 
-					suitable_ground = True
-				# otherwise
-				else:
-					# the ground is unsuitable 
-					suitable_ground = False
-
 def seed_planting_mission(total_rows, total_columns):
 	# for every column from 1 to the specified toal drop columns
 	for column in range(1, total_columns+1): 
@@ -189,26 +166,9 @@ def seed_planting_mission(total_rows, total_columns):
 		for row in range(1, total_rows+1):
 			# print to the command line what column and row the drone is currently at
 			print('Column: {}, Row: {}'.format(column, row))
-			# if the current location is not the first drop destination
-			if row != 1 and column != 1:
-				print('Analysing ground..')
-				# captures image of the ground at the current location and compares it to the starting location
-				analyse_ground(column, row) 
-				# if the ground is similar in colour to the starting location
-				if suitable_ground == True: 
-					print('Ground is suitable.')
-					# drop seeds
-					drop_seeds()
-				# otherwise, do not drop seeds
-				else: 
-					print('Ground is unsuitable')
-			# else, this is the first drop location
-			else:
-				# capture image of the ground
-				capture_ground(column, row)
-				# drop seeds
-				drop_seeds()
-			# seperator for better readability
+			# send drop seeds signal to arduino
+			drop_seeds()
+			# seperator for better command line readability
 			print('-----')
 			# if the last row and column have been reached
 			if column == total_columns and row == total_rows: 
@@ -247,12 +207,17 @@ def seed_planting_mission(total_rows, total_columns):
 				# move south
 				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
 
+
 ###### Main Excecutable ######
 
 # Connect to drone on specified port
-vehicle = connect_copter()
+vehicle = connectMyCopter()
 # Take off to specified drop height
 arm_and_takeoff(drop_height)
 # Start seed planting mission
 while vehicle.mode=='GUIDED':
 	seed_planting_mission(drop_rows, drop_columns)
+# While vehicle is still armed, wait 1 second loop
+# while vehicle.armed == True:
+# 	time.sleep(1)
+print('End of mission')
