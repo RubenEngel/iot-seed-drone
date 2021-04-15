@@ -75,7 +75,10 @@ def goto_relative_to_home_location(north, east):
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
 	print('-----')
-	time.sleep(2) # to allow time for the drone to start moving
+	# time.sleep(2) # to allow time for the drone to start moving
+	while vehicle.groundspeed <= 0.3:
+		print('Drone preparing to move..')
+		time.sleep(1)
 	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
@@ -131,7 +134,7 @@ def drop_seeds():
 
 		open_motor() # send open signal to arduino
 		print('Dropping seeds..')
-		time.sleep(0.3) # time that drops sufficient amount of seeds as tested
+		time.sleep(1) # time that drops sufficient amount of seeds as tested
 		close_motor() # send close signal to arduino
 
 	except: # if connection to the motor is not possible dont crash programme, print error actuating

@@ -148,11 +148,11 @@ def set_yaw(heading, clockwise, relative=True):
 	vehicle.send_mavlink(msg)
 	time.sleep(1.5)
 
-def turn_right():
-	set_yaw(90, 1)
+def turn_right(degrees):
+	set_yaw(degrees, 1)
 
-def turn_left():
-	set_yaw(90, -1)
+def turn_left(degrees):
+	set_yaw(degrees, -1)
 
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
@@ -171,19 +171,19 @@ def seed_planting_mission(drop_rows, drop_columns):
 				return_home()
 			elif column % 2 != 0 and row == drop_rows: # if column is odd and row is last, move right to get to new column.
 				print('Moving right to new column.')
-				turn_right()
+				turn_right(90)
 				move_forward(drop_spacing)
 			elif column % 2 == 0 and row == 1: # if column is even & is first row in column move right.
 				print('Moving Right {}m'.format(drop_spacing))
-				turn_right()
+				turn_right(90)
 				move_forward(drop_spacing)
 			elif column % 2 == 0 and row == drop_rows: # if column is even and row is last, move left to get to new column.
 				print('Moving left to new column.')
-				turn_left()
+				turn_left(90)
 				move_forward(drop_spacing)
 			elif column % 2 != 0 and column != 1 and row == 1 : # if column is odd & is not first column & first row in column, move left. 
 				print('Moving Left {}m'.format(drop_spacing))
-				turn_left()
+				turn_left(90)
 				move_forward(drop_spacing)
 			else: # if none of the conditions previous have been met, move forward.
 				print('Moving Forward {}m'.format(drop_spacing))
