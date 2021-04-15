@@ -28,9 +28,12 @@ drop_columns = int(args.columns)
 drop_rows = int(args.rows)
 
 def connect_copter():
-	connection_string = args.connect # use connection ip address of drone from user input
-	vehicle = connect(connection_string, wait_ready = True) # dronekit vehicle connection using ip address
-	return vehicle # when fucntion is run, return vehicle constant to be used to control drone by other functions
+	# use connection ip address of drone from user input
+	connection_string = args.connect 
+	# dronekit vehicle connection using ip address
+	vehicle = connect(connection_string, wait_ready = True) 
+	# when function is run, return 'vehicle' object to be used to control drone by other functions
+	return vehicle
 
 def arm_and_takeoff(targetHeight):
 	while vehicle.is_armable != True: # while the vehicle is not armable, wait.
@@ -62,11 +65,12 @@ def arm_and_takeoff(targetHeight):
 	print('----')
 
 def goto_relative_to_home_location(north, east):	
-	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly to a specified location in the North, East, Down frame.
+	# Send SET_POSITION_TARGET_LOCAL_NED command to request the vehicle fly 
+	# to a specified location in the North, East, Down frame.
 	msg = vehicle.message_factory.set_position_target_local_ned_encode(
 		0,		# time_boot_ms (not used)
 		0, 0,	# target system, target component
-		mavutil.mavlink.MAV_FRAME_LOCAL_NED,	# frame - position is relative to home location (North, East, Down frame)
+		mavutil.mavlink.MAV_FRAME_LOCAL_NED,	# frame - position is relative to home location
 		0b0000111111111000,	# type_mask (only positions enabled)
 		north, east, -drop_height, # North, East, Down position
 		0, 0, 0, # x, y, z velocity in m/s  (not used)
@@ -75,7 +79,6 @@ def goto_relative_to_home_location(north, east):
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
 	print('-----')
-	# time.sleep(2) # to allow time for the drone to start moving
 	while vehicle.groundspeed <= 0.3:
 		print('Drone preparing to move..')
 		time.sleep(1)
@@ -118,9 +121,9 @@ def look_south():
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
 	while vehicle.mode != "RTL": # wait for the mode to change.
+		print("Drone entering RTL mode..")
 		time.sleep(1)
-		print("Drone is entering return to launch mode..")
-	print("Drone is returning home")
+	print("Drone is returning home.")
 
 def drop_seeds():	
 	try: # logic to open and close USB connected motor for 0.3 seconds 	
@@ -134,7 +137,7 @@ def drop_seeds():
 
 		open_motor() # send open signal to arduino
 		print('Dropping seeds..')
-		time.sleep(1) # time that drops sufficient amount of seeds as tested
+		time.sleep(0.95) # time that drops sufficient amount of seeds as tested
 		close_motor() # send close signal to arduino
 
 	except: # if connection to the motor is not possible dont crash programme, print error actuating

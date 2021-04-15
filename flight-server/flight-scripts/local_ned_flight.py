@@ -155,9 +155,9 @@ def look_south():
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
 	while vehicle.mode != "RTL": # wait for the mode to change.
+		print("Drone entering RTL mode..")
 		time.sleep(1)
-		print("Drone is entering return to launch mode..")
-	print("Drone is returning home")
+	print("Drone is returning home.")
 
 def seed_planting_mission(total_rows, total_columns):
 
