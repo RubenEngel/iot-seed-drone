@@ -214,11 +214,13 @@ while vehicle.armed == True:
 	time.sleep(1)
 
 	# initial_location = str(vehicle.location.local_frame) # Get initial location in string format
-	# distance_moved = 0 # initialise distance moved
+	# distance_moved = 0 # initialise distance moved value to 0m
 	# print('-----')
-	# while distance_moved < drop_spacing*0.96: # While distance moved is not close to user specified drop spacing
-	# 	# Calculate distance moved every 0.5 seconds
-	# 	distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location), north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame)))
+	# # While distance moved is not close to user specified drop spacing
+	# while distance_moved < drop_spacing*0.96: 
+	# 	# Calculate distance moved every 0.5 seconds using magnitude of north and east position vectors
+	# 	distance_moved = distance_magnitude(north_position(initial_location), east_position(initial_location),\
+	# 					 north_position(str(vehicle.location.local_frame)), east_position(str(vehicle.location.local_frame))) 
 	# 	print('Distance to destination: {}'.format(drop_spacing - distance_moved))
 	# 	time.sleep(0.5)
 	# print('Destination reached')

@@ -13,11 +13,7 @@ export default function MissionStats({flightStats, row, col}) {
 
             <div className='self-center flex flex-row justify-center items-center'>
                <GiBattery100 className='mx-2'/>
-               {/* <GiBattery75/> */}
-               {/* <GiBattery50/> */}
-               {/* <GiBattery25/> */}
-               {/* <GiBattery0/> */}
-                Battery
+               Battery
             </div>
             <div className='self-center flex flex-row justify-center items-center'>
                 {(flightStats.battery) ? (flightStats.battery + ' %') : 'N/A'}
