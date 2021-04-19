@@ -23,7 +23,7 @@ parser.add_argument('--columns')
 args = parser.parse_args()
 
 connection_string = '127.0.0.1:14550' #args.connect
-drop_height = 3 #float(args.height)
+drop_height = 5 #float(args.height)
 drop_spacing = 5 #float(args.spacing)
 drop_columns = 3 #int(args.columns)
 drop_rows = 3 #int(args.rows)
@@ -117,6 +117,7 @@ def goto_relative_to_current_location(north, east, down):
 	time.sleep(2)
 	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
+		
 		time.sleep(1)
 	print('-----')
 
