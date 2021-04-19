@@ -144,6 +144,7 @@ def drop_seeds():
 	except: # if connection to the motor is not possible dont crash programme, print error actuating
 		# print('No actuator connected.')
 		print('Dropping seeds..')
+		time.sleep(0.95)
 
 def capture_ground(column, row):
 	# capture an image of the ground and save it with a name referring to its row and column
@@ -163,13 +164,15 @@ suitable_ground = True
 def analyse_ground(current_column, current_row):
 	# run the capture image function to take an image of the current location
 	# capture_ground(current_column, current_row)
+	start = time.time()
+	time.sleep(0.75)
+	print('Ground image captured.')
 	# the image is saved to the raspberry pi in the following format
 	current_location_image = '/home/ruben/iot-seed-drone/sample-images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
 	# run the image comparison script with image 1 as the start drop location and image 2 as the current drop location
 	compare_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3',\
 		'/home/ruben/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', \
 		'--image1', '/home/ruben/iot-seed-drone/sample-images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	start = time.time()
 	# while the comparison process is running
 	while compare_process.poll() is None:
 		#  for each of line of the process' output
@@ -191,7 +194,7 @@ def analyse_ground(current_column, current_row):
 					# the ground is unsuitable 
 					suitable_ground = False
 	end = time.time()
-	print('Analysis time elapsed = ' + str(end - start) + 's')
+	# print('Analysis time elapsed = ' + str(end - start) + 's')
 	global analysis_times
 	analysis_times.append(end - start)
 
@@ -279,4 +282,4 @@ arm_and_takeoff(drop_height)
 while vehicle.mode=='GUIDED':
 	seed_planting_mission(drop_rows, drop_columns)
 print('Successful drops: ' + str(successful_drops) + '/' + str(total_drops))
-print('Average time of analysis: ' + str(np.mean(analysis_times)) + 's')
+print('Average time for ground analysis: {:.2f}s'.format(np.mean(analysis_times)))
