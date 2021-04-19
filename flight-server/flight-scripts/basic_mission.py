@@ -8,6 +8,7 @@ import re
 import argparse
 import serial
 import subprocess
+import numpy as np
 
 ##### Functions ######
 
@@ -29,7 +30,7 @@ drop_rows = int(args.rows)
 
 def connect_copter():
 	# use connection ip address of drone from user input
-	connection_string = args.connect 
+	connection_string = args.connect or '127.0.0.1:14550'
 	# dronekit vehicle connection using ip address
 	vehicle = connect(connection_string, wait_ready = True) 
 	# when function is run, return 'vehicle' object to be used to control drone by other functions
@@ -141,12 +142,13 @@ def drop_seeds():
 		close_motor() # send close signal to arduino
 
 	except: # if connection to the motor is not possible dont crash programme, print error actuating
-		print('No actuator connected.')
+		# print('No actuator connected.')
+		print('Dropping seeds..')
 
 def capture_ground(column, row):
 	# capture an image of the ground and save it with a name referring to its row and column
 	capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', \
-		'/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_ground.py',\
+		'/home/ruben/iot-seed-drone/flight-server/flight-scripts/capture_ground.py',\
 		'--column', str(column), '--row', str(row)], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	# while the capture process is running
 	while capture_process.poll() is None:
@@ -160,13 +162,14 @@ suitable_ground = True
 
 def analyse_ground(current_column, current_row):
 	# run the capture image function to take an image of the current location
-	capture_ground(current_column, current_row)
+	# capture_ground(current_column, current_row)
 	# the image is saved to the raspberry pi in the following format
-	current_location_image = '/home/pi/images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
+	current_location_image = '/home/ruben/iot-seed-drone/sample-images/Column-{}_Row-{}.jpeg'.format( current_column, current_row )
 	# run the image comparison script with image 1 as the start drop location and image 2 as the current drop location
 	compare_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3',\
-		'/home/pi/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', \
-		'--image1', '/home/pi/images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		'/home/ruben/iot-seed-drone/flight-server/flight-scripts/compare_colours.py', \
+		'--image1', '/home/ruben/iot-seed-drone/sample-images/Column-1_Row-1.jpeg', '--image2', current_location_image], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	start = time.time()
 	# while the comparison process is running
 	while compare_process.poll() is None:
 		#  for each of line of the process' output
@@ -187,16 +190,27 @@ def analyse_ground(current_column, current_row):
 				else:
 					# the ground is unsuitable 
 					suitable_ground = False
+	end = time.time()
+	print('Analysis time elapsed = ' + str(end - start) + 's')
+	global analysis_times
+	analysis_times.append(end - start)
+
+analysis_times = []
+successful_drops = 0
+total_drops = 0
 
 def seed_planting_mission(total_rows, total_columns):
+	global successful_drops
+	global total_drops
 	# for every column from 1 to the specified toal drop columns
 	for column in range(1, total_columns+1): 
 		# for every row from 1 to specified total drop rows
 		for row in range(1, total_rows+1):
 			# print to the command line what column and row the drone is currently at
 			print('Column: {}, Row: {}'.format(column, row))
+			total_drops += 1
 			# if the current location is not the first drop destination
-			if row != 1 and column != 1:
+			if not (row == 1 and column == 1):
 				print('Analysing ground..')
 				# captures image of the ground at the current location and compares it to the starting location
 				analyse_ground(column, row) 
@@ -205,15 +219,17 @@ def seed_planting_mission(total_rows, total_columns):
 					print('Ground is suitable.')
 					# drop seeds
 					drop_seeds()
+					successful_drops += 1
 				# otherwise, do not drop seeds
 				else: 
 					print('Ground is unsuitable')
 			# else, this is the first drop location
 			else:
 				# capture image of the ground
-				capture_ground(column, row)
+				# capture_ground(column, row)
 				# drop seeds
 				drop_seeds()
+				successful_drops += 1
 			# seperator for better readability
 			print('-----')
 			# if the last row and column have been reached
@@ -262,3 +278,5 @@ arm_and_takeoff(drop_height)
 # Start seed planting mission
 while vehicle.mode=='GUIDED':
 	seed_planting_mission(drop_rows, drop_columns)
+print('Successful drops: ' + str(successful_drops) + '/' + str(total_drops))
+print('Average time of analysis: ' + str(np.mean(analysis_times)) + 's')
