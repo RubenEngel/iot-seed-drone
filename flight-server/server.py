@@ -48,40 +48,69 @@ def on_disconnect():
 mission_process = None
 stats_process = None
 
-# The following functions handle starting a subprocess. Subprocesses are required as dronekit is a python2 programme, the server is a python3 programme. It also help to break the programe down into modular files.
-# The output text is available to the server due to 'stdout=subprocess.PIPE'.  'stdbuf -o0' allows the output stream to be unbuffered, so the result is viewable as soon as it happens, otherwise the output text will only show when the process is complete.
+# The following functions handle starting a subprocess. 
+# Subprocesses are required as dronekit is a python2 module and the server is a python3 script. 
+# The output text is available to the server due to 'stdout=subprocess.PIPE'.  
+# 'stdbuf -o0' allows the output stream to be unbuffered, so the result is viewable as soon as it happens, 
+# otherwise the output text will only show when the process is complete.
 
 def start_mission():
-    mission_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/basic_mission.py', '--connect', '127.0.0.1:14550',\
-    '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # sends the drone on a seed planting mission with the defined flight parameters
+    mission_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', \
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/basic_mission.py',\
+            '--connect', '127.0.0.1:14550',\
+            '--height', str(drop_height), '--spacing', str(drop_spacing), '--columns', str(drop_columns), '--rows', str(drop_rows) ],\
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return mission_process
 
 def start_stats():
-    stats_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/flight_stats.py', '--connect', '127.0.0.1:14551'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # starts a dronekit script that prints live data such as velocity, altitude and battery life
+    stats_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python',\
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/flight_stats.py',\
+            '--connect', '127.0.0.1:14551'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return stats_process
 
 def land_mode():
-    land_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/land.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # starts a DroneKit script to put the drone into ‘LAND’ mode
+    land_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python',\
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/land.py',\
+            '--connect', '127.0.0.1:14550'],\
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return land_process
 
 def return_to_launch():
-    home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # starts a DroneKit script to put the drone into ‘RTL’ mode
+    home_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python',\
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/return-to-launch.py',\
+            '--connect', '127.0.0.1:14550'], \
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return home_process
 
 def disarm_drone():
-    disarm_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/disarm.py', '--connect', '127.0.0.1:14550'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # starts a DroneKit script that stops the drones motors in case of emergency
+    disarm_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python',\
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/disarm.py',\
+            '--connect', '127.0.0.1:14550'],\
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return disarm_process
 
 def drop_seeds():
-    seeds_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python', '/home/pi/iot-seed-drone/flight-server/flight-scripts/disperse_seeds.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # starts a programme to open and close the seed dispersion mechanism through the USB connected Arduino
+    seeds_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python',\
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/disperse_seeds.py'],\
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return seeds_process
 
 def capture_image():
-    capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3', '/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_image.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+    capture_process = subprocess.Popen(['stdbuf', '-o0', '/usr/bin/python3',\
+            '/home/pi/iot-seed-drone/flight-server/flight-scripts/capture_image.py'],\
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return capture_process
 
 @socket.on('flight-start') # when flight start command received from frontend socket
 def on_flight_start():
+    # send mission log message to front end confirming parameters sent succesfully
     emit('message', 'Flight parameters sent successfully.')
     global mission_process
     mission_process = start_mission()

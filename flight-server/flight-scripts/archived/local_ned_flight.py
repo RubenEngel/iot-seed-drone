@@ -115,13 +115,13 @@ def goto_relative_to_home_location(north, east):
 		0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink) 
 	# send command to vehicle
 	vehicle.send_mavlink(msg)
+	
 	print('-----')
 	time.sleep(2)
 	while vehicle.groundspeed > 0.3:
 		print('Moving to destination at {:.2f}m/s'.format(vehicle.groundspeed))
 		time.sleep(1)
 	print('-----')
-	time.sleep(1)
 
 def set_yaw(heading, clockwise, relative=True):
 	if relative:
@@ -155,41 +155,56 @@ def look_south():
 def return_home():
 	vehicle.mode = VehicleMode("RTL") # Enter return to launch mode.
 	while vehicle.mode != "RTL": # wait for the mode to change.
-		print("Drone entering RTL mode..")
 		time.sleep(1)
-	print("Drone is returning home.")
+		print("Drone is entering return to launch mode..")
+	print("Drone is returning home")
 
 def seed_planting_mission(total_rows, total_columns):
-
-	for column in range(1, total_columns+1):
-
-		for row in range(1, total_rows+1): # runs until the second to last row (loops go to 1 before second argument)
-
-			print('Column: {}, Row: {}'.format(column, row)) # print what column and row currently at
+	# for every column from 1 to the specified toal drop columns
+	for column in range(1, total_columns+1): 
+		# for every row from 1 to specified total drop rows
+		for row in range(1, total_rows+1):
+			# print to the command line what column and row the drone is currently at
+			print('Column: {}, Row: {}'.format(column, row))
+			# send drop seeds signal to arduino
 			drop_seeds()
-				
+			# seperator for better command line readability
 			print('-----')
-
-			if column == total_columns and row == total_rows: # runs when the last row and column have been reached
-				return_home() # go back top starting location
+			# if the last row and column have been reached
+			if column == total_columns and row == total_rows: 
+				# go back to the starting location and land
+				return_home()
+			# otherwsie if the column is odd and the row is the last in that column
 			elif column % 2 != 0 and row == total_rows:
 				print('Moving east to new column:')
+				# turn towards the direction of travel (east)
 				look_east()
+				# move to the the first row of the next column
 				goto_relative_to_home_location(drop_spacing * (total_rows - 1), drop_spacing * (column))
+			# otherwsie if the column is even and the row is the last in that column
 			elif column % 2 == 0 and row == total_rows:
 				print('Moving east to new column:')
+				# turn towards the direction of travel (east)
 				look_east()
+				# move to the the first row of the next column
 				goto_relative_to_home_location(0, drop_spacing * (column))
-			# This part starts running after the first drop in a column and handles moving to the next drop location
-			elif column % 2 != 0: # if column is odd and not the last drop in the column
+			# otherwsie if the column is odd
+			elif column % 2 != 0:
 				print('Moving north {}m:'.format(drop_spacing))
+				# and if the row is the first in that column
 				if row == 1:
+					# turn towards the direction of travel
 					look_north()
+				# move north
 				goto_relative_to_home_location( drop_spacing * (row), drop_spacing * (column - 1) )
-			elif column % 2 == 0: # if column is even
+			# otherwise if column is even
+			elif column % 2 == 0: 
 				print('Moving south {}m:'.format(drop_spacing))
+				# and if the row is the first in that column
 				if row == 1:
+					# turn towards the direction of travel
 					look_south()
+				# move south
 				goto_relative_to_home_location( drop_spacing * (total_rows - 1) - drop_spacing * (row), drop_spacing * (column - 1) ) 
 
 
