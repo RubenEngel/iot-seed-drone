@@ -19,3 +19,9 @@ A flask server that is able to call subprocesses for the flight scripts (require
 in src - React control frontend, mobile centred styled with tailwindCSS and uses socket.io and REST API to communicate with backend. Shows a mission log using the output from the flight script subprocess. Shows flight statistics using the output from the flight stats subprocess. Live video feed to be implemented.
 
 <img width="577" alt="Screenshot 2021-06-19 at 20 20 21" src="https://user-images.githubusercontent.com/66388962/122653366-dc0c4780-d13b-11eb-9dbd-ddd557488e06.png">
+
+# Project Report
+## Individual
+[Engel_Team29_ IndividualReport.pdf](https://github.com/RubenEngel/iot-seed-drone/files/6681264/Engel_Team29_.IndividualReport.pdf)
+## Team 
+[Team29_TeamReport.pdf](https://github.com/RubenEngel/iot-seed-drone/files/6681266/Team29_TeamReport.pdf)
